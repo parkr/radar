@@ -13,6 +13,8 @@ func main() {
 	flag.StringVar(&binding, "http", ":8291", "The IP/PORT to bind this server to.")
 	flag.Parse()
 
-	http.Handle("/emails", radar.EmailHandler{})
+	emailHandler := radar.EmailHandler{}
+	http.Handle("/emails", emailHandler)
+	http.Handle("/email", emailHandler)
 	fmt.Println(http.ListenAndServe(binding, nil))
 }
