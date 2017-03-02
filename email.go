@@ -2,7 +2,6 @@ package radar
 
 import (
 	"io/ioutil"
-	//"encoding/json"
 	"log"
 	"net/http"
 )
@@ -12,9 +11,7 @@ type EmailHandler struct {
 }
 
 func (h EmailHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	//var payload map[string]interface{}
-	//err := json.NewDecoder(r.Body).Decode(payload)
-
+	r.ParseForm()
 	log.Printf("%#v", r)
 
 	stuff, err := ioutil.ReadAll(r.Body)
