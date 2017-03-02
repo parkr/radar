@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/gorilla/handlers"
 	"github.com/parkr/radar"
 )
 
@@ -19,8 +20,8 @@ func main() {
 		AllowedSenders: strings.Split(os.Getenv("RADAR_ALLOWED_SENDERS"), ","),
 		Debug:          (os.Getenv("DEBUG") != ""),
 	}
-	http.Handle("/emails", emailHandler)
-	http.Handle("/email", emailHandler)
+	http.Handle("/emails", handlers.LoggingHandler(os.Stdout, emailHandler))
+	http.Handle("/email", handlers.LoggingHandler(os.Stdout, emailHandler))
 
 	log.Println("Starting server on", binding)
 	log.Println(http.ListenAndServe(binding, nil))

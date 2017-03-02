@@ -7,6 +7,11 @@
 	],
 	"Deps": [
 		{
+			"ImportPath": "github.com/gorilla/handlers",
+			"Comment": "v1.2-4-g13d7309",
+			"Rev": "13d73096a474cac93275c679c7b8a2dc17ddba82"
+		},
+		{
 			"ImportPath": "github.com/mvdan/xurls",
 			"Comment": "v1.1.0-2-gc64477d",
 			"Rev": "c64477d7d2c6d98b70e867af3f3ea50e8936966b"
