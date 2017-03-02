@@ -4,18 +4,45 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/mail"
 
 	"github.com/mvdan/xurls"
 )
 
 type EmailHandler struct {
+	// Email addresses that must be in the "From" section of the message.
+	AllowedSenders []string
+
+	// Enable debug logging.
 	Debug bool
+}
+
+func (h EmailHandler) IsAllowedSender(sender string) bool {
+	email, err := mail.ParseAddress(sender)
+	if err != nil {
+		log.Printf("could not process sender '%s': %#v", sender, err)
+		return false
+	}
+
+	for _, allowedSender := range h.AllowedSenders {
+		if allowedSender == email.Address {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (h EmailHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if contentType := r.Header.Get("Content-Type"); contentType != "application/x-www-form-urlencoded" {
 		log.Println("Don't know how to handle Content-Type:", contentType)
 		http.Error(w, "cannot process Content-Type: "+contentType, http.StatusBadRequest)
+		return
+	}
+
+	if sender := r.FormValue("From"); !h.IsAllowedSender(sender) {
+		log.Println("not an allowed sender: ", sender)
+		http.Error(w, "not an allowed sender: "+sender, http.StatusUnauthorized)
 		return
 	}
 
