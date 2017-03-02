@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/parkr/radar"
 )
@@ -13,7 +14,7 @@ func main() {
 	flag.StringVar(&binding, "http", ":8291", "The IP/PORT to bind this server to.")
 	flag.Parse()
 
-	emailHandler := radar.EmailHandler{}
+	emailHandler := radar.EmailHandler{Debug: os.Getenv("DEBUG") != ""}
 	http.Handle("/emails", emailHandler)
 	http.Handle("/email", emailHandler)
 
