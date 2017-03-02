@@ -1,6 +1,7 @@
 package radar
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -15,6 +16,8 @@ type EmailHandler struct {
 
 	// Enable debug logging.
 	Debug bool
+
+	Database *sql.DB
 }
 
 func (h EmailHandler) IsAllowedSender(sender string) bool {
