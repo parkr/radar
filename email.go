@@ -17,6 +17,7 @@ type EmailHandler struct {
 	// Enable debug logging.
 	Debug bool
 
+	// Database to use as backend.
 	Database *sql.DB
 }
 
