@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/parkr/radar"
@@ -16,5 +16,7 @@ func main() {
 	emailHandler := radar.EmailHandler{}
 	http.Handle("/emails", emailHandler)
 	http.Handle("/email", emailHandler)
-	fmt.Println(http.ListenAndServe(binding, nil))
+
+	log.Println("Starting server on", binding)
+	log.Println(http.ListenAndServe(binding, nil))
 }
