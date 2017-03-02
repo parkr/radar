@@ -1,0 +1,15 @@
+{
+	"ImportPath": "github.com/parkr/radar",
+	"GoVersion": "go1.8",
+	"GodepVersion": "v79",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/mvdan/xurls",
+			"Comment": "v1.1.0-2-gc64477d",
+			"Rev": "c64477d7d2c6d98b70e867af3f3ea50e8936966b"
+		}
+	]
+}
