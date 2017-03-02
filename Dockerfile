@@ -9,7 +9,7 @@ ADD . .
 RUN go version
 
 # Compile a standalone executable
-RUN CGO_ENABLED=0 go install github.com/parkr/radar
+RUN CGO_ENABLED=0 go install github.com/parkr/radar/cmd/...
 
-# Make `radar` available to the `Dockerfile.release` build
-CMD [ "./radar" ]
+# Run the radar command by default.
+CMD [ "radar" ]
