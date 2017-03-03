@@ -71,7 +71,7 @@ func (rs RadarItemsService) Create(ctx context.Context, m RadarItem) error {
 	}
 	defer tx.Rollback()
 
-	stmt, err := tx.Prepare("INSERT INTO radar_items (urls, titles) VALUES (?, ?)")
+	stmt, err := tx.Prepare("INSERT INTO radar_items (url, title) VALUES (?, ?)")
 	if err != nil {
 		return err
 	}
