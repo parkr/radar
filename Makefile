@@ -5,6 +5,7 @@ build:
 
 test:
 	go test github.com/parkr/radar/...
+	go vet github.com/parkr/radar/...
 
 docker-release: all
 	docker build -t parkr/radar:$(shell git rev-parse HEAD) .

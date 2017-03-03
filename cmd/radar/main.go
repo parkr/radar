@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"strings"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/handlers"
@@ -34,10 +35,12 @@ func main() {
 	emailHandler := radar.EmailHandler{
 		AllowedSenders: strings.Split(os.Getenv("RADAR_ALLOWED_SENDERS"), ","),
 		Debug:          (os.Getenv("DEBUG") != ""),
-		Database:       getDB(),
+		RadarItems:     radar.RadarItemsService{Database: getDB()},
 	}
 	http.Handle("/emails", handlers.LoggingHandler(os.Stdout, emailHandler))
 	http.Handle("/email", handlers.LoggingHandler(os.Stdout, emailHandler))
+
+	go emailHandler.Start()
 
 	log.Println("Starting server on", binding)
 	server := &http.Server{Addr: binding}
@@ -48,10 +51,12 @@ func main() {
 		for sig := range c {
 			// sig is a ^C, handle it
 			log.Printf("Received signal %#v!", sig)
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer cancel()
 			log.Println("Closing database connection...")
-			emailHandler.Database.Close()
+			emailHandler.Shutdown(ctx)
 			log.Println("Telling server to shutdown...")
-			server.Shutdown(context.Background())
+			server.Shutdown(ctx)
 			log.Println("Done with graceful shutdown.")
 		}
 	}()

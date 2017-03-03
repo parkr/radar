@@ -1,11 +1,12 @@
 package radar
 
 import (
-	"database/sql"
+	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"net/mail"
+	"time"
 
 	"github.com/mvdan/xurls"
 )
@@ -17,8 +18,26 @@ type EmailHandler struct {
 	// Enable debug logging.
 	Debug bool
 
-	// Database to use as backend.
-	Database *sql.DB
+	// RadarItem service
+	RadarItems RadarItemsService
+
+	// The queue
+	CreateQueue chan string
+}
+
+func (h EmailHandler) Start() {
+	for url := range h.CreateQueue {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		if err := h.RadarItems.Create(ctx, RadarItem{URL: url}); err != nil {
+			log.Printf("error saving '%s': %#v", url, err)
+		}
+		cancel()
+	}
+}
+
+func (h EmailHandler) Shutdown(ctx context.Context) {
+	close(h.CreateQueue)
+	h.RadarItems.Shutdown(ctx)
 }
 
 func (h EmailHandler) IsAllowedSender(sender string) bool {
@@ -68,6 +87,10 @@ func (h EmailHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if h.Debug {
 		log.Printf("urls: %#v", urls)
+	}
+
+	for _, url := range urls {
+		h.CreateQueue <- url
 	}
 
 	http.Error(w, fmt.Sprintf("added %d urls to today's radar", len(urls)), http.StatusCreated)
