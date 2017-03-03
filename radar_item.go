@@ -51,10 +51,14 @@ func (rs RadarItemsService) List(ctx context.Context, limit int) ([]RadarItem, e
 	items := []RadarItem{}
 	for rows.Next() {
 		var item RadarItem
-		if err := rows.Scan(&item.ID, &item.URL, &item.Title); err != nil {
+		var title sql.NullString
+		if err := rows.Scan(&item.ID, &item.URL, &title); err != nil {
 			return nil, errors.Wrap(err, "scan for select failed")
 		}
 		log.Printf("loaded row=%#v", item)
+		if title.Valid {
+			item.Title = title.String
+		}
 		items = append(items, item)
 	}
 
