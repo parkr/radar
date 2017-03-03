@@ -39,7 +39,7 @@ func (h EmailHandler) Start() {
 	for url := range h.CreateQueue {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		if err := h.RadarItems.Create(ctx, RadarItem{URL: url}); err != nil {
-			log.Printf("error saving '%s': %#v", url, err)
+			log.Printf("error saving '%s': %#v %+v", url, err, err)
 		} else {
 			log.Printf("saved url=%s to database", url)
 		}
