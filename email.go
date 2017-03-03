@@ -2,6 +2,7 @@ package radar
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -16,7 +17,7 @@ func NewEmailHandler(database *sql.DB, allowedSenders []string, debug bool) Emai
 		AllowedSenders: allowedSenders,
 		Debug:          debug,
 		RadarItems:     RadarItemsService{Database: database},
-		CreateQueue:    make(chan radar.RadarItem, 10),
+		CreateQueue:    make(chan string, 10),
 	}
 }
 
@@ -40,7 +41,7 @@ func (h EmailHandler) Start() {
 		if err := h.RadarItems.Create(ctx, RadarItem{URL: url}); err != nil {
 			log.Printf("error saving '%s': %#v", url, err)
 		} else {
-			log.Println("saved url=%s to database", url)
+			log.Printf("saved url=%s to database", url)
 		}
 		cancel()
 	}
