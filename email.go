@@ -11,6 +11,15 @@ import (
 	"github.com/mvdan/xurls"
 )
 
+func NewEmailHandler(database *sql.DB, allowedSenders []string, debug bool) EmailHandler {
+	return EmailHandler{
+		AllowedSenders: allowedSenders,
+		Debug:          debug,
+		RadarItems:     RadarItemsService{Database: database},
+		CreateQueue:    make(chan radar.RadarItem, 10),
+	}
+}
+
 type EmailHandler struct {
 	// Email addresses that must be in the "From" section of the message.
 	AllowedSenders []string
@@ -30,6 +39,8 @@ func (h EmailHandler) Start() {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		if err := h.RadarItems.Create(ctx, RadarItem{URL: url}); err != nil {
 			log.Printf("error saving '%s': %#v", url, err)
+		} else {
+			log.Println("saved url=%s to database", url)
 		}
 		cancel()
 	}
@@ -58,7 +69,7 @@ func (h EmailHandler) IsAllowedSender(sender string) bool {
 
 func (h EmailHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if contentType := r.Header.Get("Content-Type"); contentType != "application/x-www-form-urlencoded" {
-		log.Println("Don't know how to handle Content-Type:", contentType)
+		log.Println("don't know how to handle Content-Type:", contentType)
 		http.Error(w, "cannot process Content-Type: "+contentType, http.StatusBadRequest)
 		return
 	}

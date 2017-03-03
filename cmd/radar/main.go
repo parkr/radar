@@ -32,11 +32,11 @@ func main() {
 	flag.StringVar(&binding, "http", ":8291", "The IP/PORT to bind this server to.")
 	flag.Parse()
 
-	emailHandler := radar.EmailHandler{
-		AllowedSenders: strings.Split(os.Getenv("RADAR_ALLOWED_SENDERS"), ","),
-		Debug:          (os.Getenv("DEBUG") != ""),
-		RadarItems:     radar.RadarItemsService{Database: getDB()},
-	}
+	emailHandler := radar.NewEmailHandler(
+		getDB(), // Database
+		strings.Split(os.Getenv("RADAR_ALLOWED_SENDERS"), ","), // Allowed senders (email addresses)
+		(os.Getenv("DEBUG") != ""),                             // Whether in debug mode
+	)
 	http.Handle("/emails", handlers.LoggingHandler(os.Stdout, emailHandler))
 	http.Handle("/email", handlers.LoggingHandler(os.Stdout, emailHandler))
 
