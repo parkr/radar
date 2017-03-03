@@ -77,12 +77,12 @@ func (rs RadarItemsService) Create(ctx context.Context, m RadarItem) error {
 	}
 	defer tx.Rollback()
 
-	stmt, err := tx.Prepare("INSERT INTO radar_items (url, title) VALUES (?, ?)")
+	stmt, err := tx.Prepare("INSERT INTO radar_items (url, title) VALUES ( ?, ? )")
 	if err != nil {
 		return errors.Wrap(err, "prepare for insert failed")
 	}
 
-	if _, err = tx.Exec(m.URL, m.Title); err != nil {
+	if _, err = stmt.Exec(m.URL, m.Title); err != nil {
 		return errors.Wrap(err, "exec for insert failed")
 	}
 	defer stmt.Close()
@@ -107,7 +107,7 @@ func (rs RadarItemsService) Delete(ctx context.Context, id int64) error {
 	if err != nil {
 		return errors.Wrap(err, "prepare for delete failed")
 	}
-	if _, err = tx.Exec(strconv.FormatInt(id, 10)); err != nil {
+	if _, err = stmt.Exec(strconv.FormatInt(id, 10)); err != nil {
 		return errors.Wrap(err, "exec for delete failed")
 	}
 	defer stmt.Close()
