@@ -16,25 +16,25 @@ func (r RadarItem) GetTitle() string {
 		return r.Title
 	}
 
-	url, err := url.Parse(r.URL)
+	u, err := url.Parse(r.URL)
 	if err != nil {
 		return r.URL
 	}
 
-	if isBinaryResource(url) {
-		return "File on " + url.Hostname()
+	if isBinaryResource(u) {
+		return "File on " + u.Hostname()
 	}
 
-	resp, err := http.Get(r.URL)
+	resp, err := http.Get(u.String())
 	if err != nil {
-		return "A page on " + url.Hostname()
+		return "A page on " + u.Hostname()
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	matches := titleExtractorRegexp.FindAllStringSubmatch(string(body), -1)
 	if len(matches) < 1 || len(matches[0]) < 2 {
-		return "A page on " + url.Hostname()
+		return "A page on " + u.Hostname()
 	}
 	return matches[0][1]
 }
