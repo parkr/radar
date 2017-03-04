@@ -12,6 +12,14 @@
 			"Rev": "2e00b5cd70399450106cec6431c2e2ce3cae5034"
 		},
 		{
+			"ImportPath": "github.com/google/go-github/github",
+			"Rev": "6d87e6ecefb23287203efc7b867f929ccb5a9375"
+		},
+		{
+			"ImportPath": "github.com/google/go-querystring/query",
+			"Rev": "53e6ce116135b80d037921a7fdd5138cf32d7a8a"
+		},
+		{
 			"ImportPath": "github.com/gorilla/handlers",
 			"Comment": "v1.2-4-g13d7309",
 			"Rev": "13d73096a474cac93275c679c7b8a2dc17ddba82"
@@ -25,6 +33,18 @@
 			"ImportPath": "github.com/pkg/errors",
 			"Comment": "v0.8.0-3-gbfd5150",
 			"Rev": "bfd5150e4e41705ded2129ec33379de1cb90b513"
+		},
+		{
+			"ImportPath": "golang.org/x/net/context",
+			"Rev": "d379faa25cbdc04d653984913a2ceb43b0bc46d7"
+		},
+		{
+			"ImportPath": "golang.org/x/oauth2",
+			"Rev": "314dd2c0bf3ebd592ec0d20847d27e79d0dbe8dd"
+		},
+		{
+			"ImportPath": "golang.org/x/oauth2/internal",
+			"Rev": "314dd2c0bf3ebd592ec0d20847d27e79d0dbe8dd"
 		}
 	]
 }
