@@ -30,15 +30,20 @@ func getDB() *sql.DB {
 func main() {
 	var binding string
 	flag.StringVar(&binding, "http", ":8291", "The IP/PORT to bind this server to.")
+	var debug bool
+	flag.BoolVar(&debug, "debug", os.Getenv("DEBUG") == "", "Whether to print debugging messages.")
 	flag.Parse()
 
 	emailHandler := radar.NewEmailHandler(
 		getDB(), // Database
 		strings.Split(os.Getenv("RADAR_ALLOWED_SENDERS"), ","), // Allowed senders (email addresses)
-		(os.Getenv("DEBUG") != ""),                             // Whether in debug mode
+		debug, // Whether in debug mode
 	)
 	http.Handle("/emails", handlers.LoggingHandler(os.Stdout, emailHandler))
 	http.Handle("/email", handlers.LoggingHandler(os.Stdout, emailHandler))
+
+	apiHandler := radar.NewAPIHandler(radarItemsService, debug)
+	http.Handle("/api*", handlers.LoggingHandler(os.Stdout, apiHandler))
 
 	go emailHandler.Start()
 

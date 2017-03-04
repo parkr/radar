@@ -69,6 +69,34 @@ func (rs RadarItemsService) List(ctx context.Context, limit int) ([]RadarItem, e
 	return items, nil
 }
 
+// Delete removes a RadarItem from the database by its ID.
+func (rs RadarItemsService) Get(ctx context.Context, id int64) (RadarItem, error) {
+	var radarItem RadarItem
+
+	tx, err := rs.Database.BeginTx(ctx, nil)
+	if err != nil {
+		return radarItem, errors.Wrap(err, "transaction failed to begin")
+	}
+	defer tx.Rollback()
+
+	stmt, err := tx.Prepare("SELECT id, url, title FROM radar_items WHERE id = ?")
+	if err != nil {
+		return radarItem, errors.Wrap(err, "prepare for get failed")
+	}
+
+	if err = stmt.QueryRow(strconv.FormatInt(id, 10)).Scan(&radarItem.ID, &radarItem.URL, &radarItem.Title); err != nil {
+		return radarItem, errors.Wrap(err, "queryrow for get failed")
+	}
+	defer stmt.Close()
+
+	err = tx.Commit()
+	if err != nil {
+		return radarItem, errors.Wrap(err, "commit for get failed")
+	}
+
+	return radarItem, nil
+}
+
 // Create adds a RadarItem to the database.
 func (rs RadarItemsService) Create(ctx context.Context, m RadarItem) error {
 	tx, err := rs.Database.BeginTx(ctx, nil)
