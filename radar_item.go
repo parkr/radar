@@ -19,6 +19,8 @@ import (
 //   PRIMARY KEY (`id`)
 // ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 //
+//
+// RadarItem.GetTitle() is defined in parser.go. Use that to fetch the title!
 type RadarItem struct {
 	ID    int64
 	URL   string

@@ -11,9 +11,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-func NewAPIHandler(db *sql.DB, debug bool) APIHandler {
+func NewAPIHandler(radarItemsService RadarItemsService, debug bool) APIHandler {
 	return APIHandler{
-		RadarItems: RadarItemsService{Database: db},
+		RadarItems: radarItemsService,
 		Debug:      debug,
 	}
 }

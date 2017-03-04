@@ -2,7 +2,6 @@ package radar
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -12,11 +11,11 @@ import (
 	"github.com/mvdan/xurls"
 )
 
-func NewEmailHandler(database *sql.DB, allowedSenders []string, debug bool) EmailHandler {
+func NewEmailHandler(radarItemsService RadarItemsService, allowedSenders []string, debug bool) EmailHandler {
 	return EmailHandler{
 		AllowedSenders: allowedSenders,
 		Debug:          debug,
-		RadarItems:     RadarItemsService{Database: database},
+		RadarItems:     radarItemsService,
 		CreateQueue:    make(chan string, 10),
 	}
 }
