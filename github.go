@@ -36,7 +36,7 @@ func GenerateRadarIssue(radarItemsService RadarItemsService, githubToken string,
 	}
 
 	if issue := getPreviousRadarIssue(ctx, client, owner, name); issue != nil {
-		links = append(links, extractGitHubLinks(ctx, client, issue)...)
+		links = append(links, extractGitHubLinks(ctx, client, owner, name, issue)...)
 	}
 
 	body, err := joinLinksIntoBody(links)
@@ -92,7 +92,7 @@ func joinLinksIntoBody(links []RadarItem) (string, error) {
 	return buf.String(), err
 }
 
-func extractGitHubLinks(ctx context.Context, client *github.Client, issue *github.Issue) []RadarItem {
+func extractGitHubLinks(ctx context.Context, client *github.Client, owner, name string, issue *github.Issue) []RadarItem {
 	var items []RadarItem
 
 	items = append(items, extractLinkedTodosFromMarkdown(issue.GetBody())...)
@@ -103,13 +103,7 @@ func extractGitHubLinks(ctx context.Context, client *github.Client, issue *githu
 		ListOptions: github.ListOptions{PerPage: 100},
 	}
 	for {
-		comments, resp, err := client.Issues.ListComments(
-			ctx,
-			*issue.Repository.Owner.Login,
-			*issue.Repository.Name,
-			*issue.Number,
-			opts,
-		)
+		comments, resp, err := client.Issues.ListComments(ctx, owner, name, *issue.Number, opts)
 		if err != nil {
 			log.Printf("Error fetching comments: %#v", err)
 			return items
