@@ -18,11 +18,29 @@ var clients = map[string]*github.Client{}
 
 var labels = []string{"radar"}
 
-var bodyTmpl = template.Must(template.New("body").Parse(`{{range .}}- [ ] [{{.GetTitle}}]({{.URL}})
+var bodyTmpl = template.Must(template.New("body").Parse(`
+{{with .OldIssueURL}}*Previously.* {{.}}
+
+From before:{{end}}
+
+{{range .OldIssues}}- [ ] [{{.GetTitle}}]({{.URL}})
+{{end}}
+
+New:
+
+{{range .NewIssues}}- [ ] [{{.GetTitle}}]({{.URL}})
 {{end}}`))
+
+type tmplData struct {
+	OldIssueURL string
+	NewIssues   []RadarItem
+	OldIssues   []RadarItem
+}
 
 func GenerateRadarIssue(radarItemsService RadarItemsService, githubToken string, repo string) (*github.Issue, error) {
 	client := getClient(githubToken)
+
+	var data tmplData
 
 	repoPieces := strings.Split(repo, "/")
 	owner, name := repoPieces[0], repoPieces[1]
@@ -34,13 +52,15 @@ func GenerateRadarIssue(radarItemsService RadarItemsService, githubToken string,
 	if err != nil {
 		return nil, err
 	}
+	data.NewIssues = links
 
 	previousIssue := getPreviousRadarIssue(ctx, client, owner, name)
 	if previousIssue != nil {
-		links = append(links, extractGitHubLinks(ctx, client, owner, name, previousIssue)...)
+		data.OldIssueURL = *previousIssue.HTMLURL
+		data.OldIssues = extractGitHubLinks(ctx, client, owner, name, previousIssue)
 	}
 
-	body, err := joinLinksIntoBody(links)
+	body, err := generateBody(data)
 	if err != nil {
 		log.Printf("Couldn't get a radar body: %#v", err)
 		return nil, err
@@ -102,13 +122,13 @@ func getTitle() string {
 	return fmt.Sprintf("Radar for %s", time.Now().Format("2006-01-02"))
 }
 
-func joinLinksIntoBody(links []RadarItem) (string, error) {
-	if len(links) == 0 {
+func generateBody(data tmplData) (string, error) {
+	if len(data.NewIssues) == 0 && len(data.OldIssues) == 0 {
 		return "Nothing to do today. Nice work! :sparkles:", nil
 	}
 
-	buf := bytes.NewBufferString("A new day! Here's what you have saved:\n\n")
-	err := bodyTmpl.Execute(buf, links)
+	buf := bytes.NewBufferString("A new day! Here's what you have saved:\n")
+	err := bodyTmpl.Execute(buf, data)
 	return buf.String(), err
 }
 

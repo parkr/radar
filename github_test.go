@@ -5,11 +5,28 @@ import (
 )
 
 func TestJoinLinksIntoBody(t *testing.T) {
-	header := "A new day! Here's what you have saved:\n\n"
-	links := []RadarItem{{URL: "https://github.com"}}
-	expected := header + "- [ ] [The world&#39;s leading software development platform · GitHub](https://github.com)\n"
+	header := "A new day! Here's what you have saved:"
+	oldLinks := []RadarItem{{URL: "https://github.com"}}
+	newLinks := []RadarItem{{URL: "https://byparker.com"}}
+	expected := header + `
 
-	body, err := joinLinksIntoBody(links)
+*Previously.* https://github.com/parkr/radar/issues/1
+
+From before:
+
+- [ ] [The world&#39;s leading software development platform · GitHub](https://github.com)
+
+
+New:
+
+- [ ] [Parker Moore - By Parker](https://byparker.com)
+`
+
+	body, err := generateBody(tmplData{
+		OldIssueURL: "https://github.com/parkr/radar/issues/1",
+		OldIssues:   oldLinks,
+		NewIssues:   newLinks,
+	})
 	if err != nil {
 		t.Fatalf("Failed: expected err to be nil, but was %#v", err)
 	}
