@@ -58,11 +58,14 @@ func titleForGitHubReference(u *url.URL) string {
 	client := getClient(os.Getenv("GITHUB_ACCESS_TOKEN"))
 	ctx := context.Background()
 
+	// Trim /files from the end and strip / from the beginning.
+	path := strings.TrimPrefix(strings.TrimSuffix(u.Path, "/files"), "/")
+
 	// /parkr/radar/issues/1
 	// /parkr/radar/issues
 	// /parkr/radar/pulls
 	// /parkr/radar/pull/2
-	pieces := strings.Split(u.Path, "/")
+	pieces := strings.Split(path, "/")
 	switch len(pieces) {
 	case 2:
 		// Repo, e.g. /parkr/radar
