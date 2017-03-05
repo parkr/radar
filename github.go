@@ -35,8 +35,9 @@ func GenerateRadarIssue(radarItemsService RadarItemsService, githubToken string,
 		return nil, err
 	}
 
-	if issue := getPreviousRadarIssue(ctx, client, owner, name); issue != nil {
-		links = append(links, extractGitHubLinks(ctx, client, owner, name, issue)...)
+	previousIssue := getPreviousRadarIssue(ctx, client, owner, name)
+	if previousIssue != nil {
+		links = append(links, extractGitHubLinks(ctx, client, owner, name, previousIssue)...)
 	}
 
 	body, err := joinLinksIntoBody(links)
@@ -52,6 +53,25 @@ func GenerateRadarIssue(radarItemsService RadarItemsService, githubToken string,
 	})
 	if err != nil {
 		return nil, err
+	}
+
+	// Close old issue.
+	if previousIssue != nil {
+		_, _, err := client.Issues.Edit(
+			ctx, owner, name, *previousIssue.Number, &github.IssueRequest{State: github.String("closed")},
+		)
+		if err != nil {
+			log.Printf("%s/%s: error closing issue number=%d: %#v", owner, name, *previousIssue.Number, err)
+		}
+	}
+
+	// Delete finished URL's.
+	for _, link := range links {
+		if link.ID > 0 {
+			if err = radarItemsService.Delete(ctx, link.ID); err != nil {
+				log.Printf("%s/%s: error deleting link id=%d: %#v", owner, name, link.ID, err)
+			}
+		}
 	}
 
 	return newIssue, nil
