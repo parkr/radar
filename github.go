@@ -19,17 +19,14 @@ var clients = map[string]*github.Client{}
 var labels = []string{"radar"}
 
 var bodyTmpl = template.Must(template.New("body").Parse(`
-{{with .OldIssueURL}}*Previously.* {{.}}
-
-From before:{{end}}
+{{with .OldIssueURL}}[*Previously:*]({{.}}){{end}}
 
 {{range .OldIssues}}- [ ] [{{.GetTitle}}]({{.URL}})
 {{end}}
+{{with .NewIssues}}New:
 
-New:
-
-{{range .NewIssues}}- [ ] [{{.GetTitle}}]({{.URL}})
-{{end}}`))
+{{range .}}- [ ] [{{.GetTitle}}]({{.URL}})
+{{end}}{{end}}`))
 
 type tmplData struct {
 	OldIssueURL string
@@ -40,7 +37,7 @@ type tmplData struct {
 func GenerateRadarIssue(radarItemsService RadarItemsService, githubToken string, repo string) (*github.Issue, error) {
 	client := getClient(githubToken)
 
-	var data tmplData
+	data := &tmplData{}
 
 	repoPieces := strings.Split(repo, "/")
 	owner, name := repoPieces[0], repoPieces[1]
@@ -122,7 +119,7 @@ func getTitle() string {
 	return fmt.Sprintf("Radar for %s", time.Now().Format("2006-01-02"))
 }
 
-func generateBody(data tmplData) (string, error) {
+func generateBody(data *tmplData) (string, error) {
 	if len(data.NewIssues) == 0 && len(data.OldIssues) == 0 {
 		return "Nothing to do today. Nice work! :sparkles:", nil
 	}

@@ -10,19 +10,16 @@ func TestJoinLinksIntoBody(t *testing.T) {
 	newLinks := []RadarItem{{URL: "https://byparker.com"}}
 	expected := header + `
 
-*Previously.* https://github.com/parkr/radar/issues/1
-
-From before:
+[*Previously:*](https://github.com/parkr/radar/issues/1)
 
 - [ ] [The world&#39;s leading software development platform · GitHub](https://github.com)
-
 
 New:
 
 - [ ] [Parker Moore - By Parker](https://byparker.com)
 `
 
-	body, err := generateBody(tmplData{
+	body, err := generateBody(&tmplData{
 		OldIssueURL: "https://github.com/parkr/radar/issues/1",
 		OldIssues:   oldLinks,
 		NewIssues:   newLinks,
