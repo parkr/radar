@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"log"
+	"net/url"
 	"strconv"
 
 	"github.com/pkg/errors"
@@ -25,6 +26,35 @@ type RadarItem struct {
 	ID    int64
 	URL   string
 	Title string
+
+	parsedURL *url.URL
+}
+
+func (r *RadarItem) GetHostname() string {
+	if r.parsedURL == nil {
+		var err error
+		r.parsedURL, err = url.Parse(r.URL)
+		if err != nil {
+			log.Printf("GetHostname: couldn't parse URL %q: %+v", r.URL, err)
+			return ""
+		}
+	}
+
+	return r.parsedURL.Hostname()
+}
+
+type RadarItems []RadarItem
+
+func (r RadarItems) Len() int {
+	return len(r)
+}
+
+func (r RadarItems) Swap(i, j int) {
+	r[i], r[j] = r[j], r[i]
+}
+
+func (r RadarItems) Less(i, j int) bool {
+	return r[i].GetHostname() < r[j].GetHostname()
 }
 
 type RadarItemsService struct {

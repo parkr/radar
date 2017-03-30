@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"sort"
 	"strings"
 	"text/template"
 	"time"
@@ -56,6 +57,9 @@ func GenerateRadarIssue(radarItemsService RadarItemsService, githubToken string,
 		data.OldIssueURL = *previousIssue.HTMLURL
 		data.OldIssues = extractGitHubLinks(ctx, client, owner, name, previousIssue)
 	}
+
+	sort.Stable(RadarItems(data.NewIssues))
+	sort.Stable(RadarItems(data.OldIssues))
 
 	body, err := generateBody(data)
 	if err != nil {
