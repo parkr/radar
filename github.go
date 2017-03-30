@@ -42,7 +42,7 @@ func GenerateRadarIssue(radarItemsService RadarItemsService, githubToken string,
 	repoPieces := strings.Split(repo, "/")
 	owner, name := repoPieces[0], repoPieces[1]
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
 	links, err := radarItemsService.List(ctx, -1)
