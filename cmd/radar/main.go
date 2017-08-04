@@ -53,21 +53,26 @@ func radarGenerator(radarItemsService radar.RadarItemsService, ticker *time.Tick
 		return
 	}
 
+	mention := os.Getenv("RADAR_MENTION")
+	if mention == "" {
+		log.Println("RADAR_MENTION is empty. Just so you know.")
+	}
+
 	log.Printf("Will generate radar at %s:00 every day.", hourToGenerateRadar)
 
 	for range ticker.C {
 		thisHour := time.Now().Format("15")
 		if thisHour == hourToGenerateRadar {
 			log.Println("The time has come: let's generate the radar!")
-			generateRadar(radarItemsService, githubToken, radarRepo)
+			generateRadar(radarItemsService, githubToken, radarRepo, mention)
 		} else {
 			log.Printf("Wrong hour to generate! %s != %s", thisHour, hourToGenerateRadar)
 		}
 	}
 }
 
-func generateRadar(radarItemsService radar.RadarItemsService, githubToken, radarRepo string) {
-	issue, err := radar.GenerateRadarIssue(radarItemsService, githubToken, radarRepo)
+func generateRadar(radarItemsService radar.RadarItemsService, githubToken, radarRepo, mention string) {
+	issue, err := radar.GenerateRadarIssue(radarItemsService, githubToken, radarRepo, mention)
 	if err == nil {
 		log.Printf("Generated new radar issue: %s", *issue.HTMLURL)
 	} else {

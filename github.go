@@ -27,18 +27,23 @@ var bodyTmpl = template.Must(template.New("body").Parse(`
 {{with .NewIssues}}New:
 
 {{range .}}- [ ] [{{.GetTitle}}]({{.URL}})
-{{end}}{{end}}`))
+{{end}}{{end}}
+{{with .Mention}}/cc {{.}}{{end}}
+`))
 
 type tmplData struct {
 	OldIssueURL string
 	NewIssues   []RadarItem
 	OldIssues   []RadarItem
+	Mention     string
 }
 
-func GenerateRadarIssue(radarItemsService RadarItemsService, githubToken string, repo string) (*github.Issue, error) {
+func GenerateRadarIssue(radarItemsService RadarItemsService, githubToken string, repo, mention string) (*github.Issue, error) {
 	client := getClient(githubToken)
 
-	data := &tmplData{}
+	data := &tmplData{
+		Mention: mention,
+	}
 
 	repoPieces := strings.Split(repo, "/")
 	owner, name := repoPieces[0], repoPieces[1]
