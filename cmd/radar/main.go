@@ -57,9 +57,9 @@ func radarGenerator(radarItemsService radar.RadarItemsService, trigger chan os.S
 
 	log.Printf("Will generate radar at %s:00 every day.", hourToGenerateRadar)
 
-	for range trigger {
+	for signal := range trigger {
 		thisHour := time.Now().Format("15")
-		if thisHour == hourToGenerateRadar {
+		if thisHour == hourToGenerateRadar || signal == syscall.SIGUSR2 {
 			log.Println("The time has come: let's generate the radar!")
 			generateRadar(radarItemsService, githubToken, radarRepo, mention)
 		} else {
