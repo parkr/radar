@@ -32,24 +32,21 @@ func getRadarItemsService() radar.RadarItemsService {
 	return radar.RadarItemsService{Database: getDB()}
 }
 
-func radarGenerator(radarItemsService radar.RadarItemsService, ticker *time.Ticker, hourToGenerateRadar string) {
+func radarGenerator(radarItemsService radar.RadarItemsService, trigger chan os.Signal, hourToGenerateRadar string) {
 	if len(hourToGenerateRadar) != 2 {
 		log.Printf("NOT generating radar. Hour to generate is not in 24-hr time: '%s'", hourToGenerateRadar)
-		ticker.Stop()
 		return
 	}
 
 	githubToken := os.Getenv("GITHUB_ACCESS_TOKEN")
 	if githubToken == "" {
 		log.Println("NOT generating radar. GITHUB_ACCESS_TOKEN not set.")
-		ticker.Stop()
 		return
 	}
 
 	radarRepo := os.Getenv("RADAR_REPO")
 	if githubToken == "" {
 		log.Println("NOT generating radar. RADAR_REPO not set.")
-		ticker.Stop()
 		return
 	}
 
@@ -60,7 +57,7 @@ func radarGenerator(radarItemsService radar.RadarItemsService, ticker *time.Tick
 
 	log.Printf("Will generate radar at %s:00 every day.", hourToGenerateRadar)
 
-	for range ticker.C {
+	for range trigger {
 		thisHour := time.Now().Format("15")
 		if thisHour == hourToGenerateRadar {
 			log.Println("The time has come: let's generate the radar!")
@@ -104,14 +101,18 @@ func main() {
 
 	go emailHandler.Start()
 
-	ticker := time.NewTicker(1 * time.Hour)
-	go radarGenerator(radarItemsService, ticker, hourToGenerateRadar)
+	// Start the radarGenerator.
 	radarC := make(chan os.Signal, 1)
+	go radarGenerator(radarItemsService, radarC, hourToGenerateRadar)
+
+	// Sending SIGUSR2 to this process generates a radar.
 	signal.Notify(radarC, syscall.SIGUSR2)
+
+	// Prompt radarGenerator to do something every 1 hour.
+	ticker := time.NewTicker(1 * time.Hour)
 	go func() {
-		for sig := range radarC {
-			log.Printf("Received signal %#v!", sig)
-			generateRadar(radarItemsService, os.Getenv("GITHUB_ACCESS_TOKEN"), os.Getenv("RADAR_REPO"))
+		for range ticker.C {
+			radarC <- syscall.SIGUSR1
 		}
 	}()
 
