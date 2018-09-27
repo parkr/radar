@@ -89,7 +89,7 @@ func main() {
 	radarItemsService := getRadarItemsService()
 
 	emailHandler := radar.NewEmailHandler(
-		radarItemsService,                                      // RadarItemsService
+		radarItemsService, // RadarItemsService
 		strings.Split(os.Getenv("RADAR_ALLOWED_SENDERS"), ","), // Allowed senders (email addresses)
 		debug, // Whether in debug mode
 	)

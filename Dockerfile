@@ -1,15 +1,10 @@
-FROM golang
-
+FROM golang:1.11 AS build
 WORKDIR /go/src/github.com/parkr/radar
-
-EXPOSE 3306
-
 ADD . .
-
 RUN go version
-
-# Compile a standalone executable
 RUN CGO_ENABLED=0 go install github.com/parkr/radar/cmd/...
 
-# Run the radar command by default.
-CMD [ "radar" ]
+FROM scratch
+COPY --from=build /go/bin/radar /bin/radar
+EXPOSE 3306
+CMD [ "/bin/radar" ]
