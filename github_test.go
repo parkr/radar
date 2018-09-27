@@ -12,12 +12,12 @@ func TestJoinLinksIntoBody(t *testing.T) {
 
 [*Previously:*](https://github.com/parkr/radar/issues/1)
 
-- [ ] [The world&#39;s leading software development platform · GitHub](https://github.com)
+- [ ] [The world’s leading software development platform · GitHub](https://github.com)
 - [ ] [Ben Balter](https://ben.balter.com)
 
 New:
 
-- [ ] [Parker Moore - By Parker](https://byparker.com)
+- [ ] [Parker Moore | By Parker](https://byparker.com)
 - [ ] [Julia Evans - Julia Evans](https://jvns.ca)
 
 /cc @parkr
@@ -33,6 +33,6 @@ New:
 		t.Fatalf("Failed: expected err to be nil, but was %#v", err)
 	}
 	if body != expected {
-		t.Fatalf("Failed: expected %#v, got %#v", expected, body)
+		t.Fatalf("Failed: expected\n\n%s\n\n, got:\n\n%s", expected, body)
 	}
 }
