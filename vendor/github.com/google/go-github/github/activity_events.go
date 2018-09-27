@@ -15,7 +15,7 @@ import (
 // Event represents a GitHub event.
 type Event struct {
 	Type       *string          `json:"type,omitempty"`
-	Public     *bool            `json:"public"`
+	Public     *bool            `json:"public,omitempty"`
 	RawPayload *json.RawMessage `json:"payload,omitempty"`
 	Repo       *Repository      `json:"repo,omitempty"`
 	Actor      *User            `json:"actor,omitempty"`
@@ -28,10 +28,14 @@ func (e Event) String() string {
 	return Stringify(e)
 }
 
-// Payload returns the parsed event payload. For recognized event types,
+// ParsePayload parses the event payload. For recognized event types,
 // a value of the corresponding struct type will be returned.
-func (e *Event) Payload() (payload interface{}) {
+func (e *Event) ParsePayload() (payload interface{}, err error) {
 	switch *e.Type {
+	case "CheckRunEvent":
+		payload = &CheckRunEvent{}
+	case "CheckSuiteEvent":
+		payload = &CheckSuiteEvent{}
 	case "CommitCommentEvent":
 		payload = &CommitCommentEvent{}
 	case "CreateEvent":
@@ -46,16 +50,18 @@ func (e *Event) Payload() (payload interface{}) {
 		payload = &ForkEvent{}
 	case "GollumEvent":
 		payload = &GollumEvent{}
-	case "IntegrationInstallationEvent":
-		payload = &IntegrationInstallationEvent{}
-	case "IntegrationInstallationRepositoriesEvent":
-		payload = &IntegrationInstallationRepositoriesEvent{}
+	case "InstallationEvent":
+		payload = &InstallationEvent{}
+	case "InstallationRepositoriesEvent":
+		payload = &InstallationRepositoriesEvent{}
 	case "IssueCommentEvent":
 		payload = &IssueCommentEvent{}
 	case "IssuesEvent":
 		payload = &IssuesEvent{}
 	case "LabelEvent":
 		payload = &LabelEvent{}
+	case "MarketplacePurchaseEvent":
+		payload = &MarketplacePurchaseEvent{}
 	case "MemberEvent":
 		payload = &MemberEvent{}
 	case "MembershipEvent":
@@ -64,10 +70,18 @@ func (e *Event) Payload() (payload interface{}) {
 		payload = &MilestoneEvent{}
 	case "OrganizationEvent":
 		payload = &OrganizationEvent{}
+	case "OrgBlockEvent":
+		payload = &OrgBlockEvent{}
 	case "PageBuildEvent":
 		payload = &PageBuildEvent{}
 	case "PingEvent":
 		payload = &PingEvent{}
+	case "ProjectEvent":
+		payload = &ProjectEvent{}
+	case "ProjectCardEvent":
+		payload = &ProjectCardEvent{}
+	case "ProjectColumnEvent":
+		payload = &ProjectColumnEvent{}
 	case "PublicEvent":
 		payload = &PublicEvent{}
 	case "PullRequestEvent":
@@ -84,13 +98,27 @@ func (e *Event) Payload() (payload interface{}) {
 		payload = &RepositoryEvent{}
 	case "StatusEvent":
 		payload = &StatusEvent{}
+	case "TeamEvent":
+		payload = &TeamEvent{}
 	case "TeamAddEvent":
 		payload = &TeamAddEvent{}
 	case "WatchEvent":
 		payload = &WatchEvent{}
 	}
-	if err := json.Unmarshal(*e.RawPayload, &payload); err != nil {
-		panic(err.Error())
+	err = json.Unmarshal(*e.RawPayload, &payload)
+	return payload, err
+}
+
+// Payload returns the parsed event payload. For recognized event types,
+// a value of the corresponding struct type will be returned.
+//
+// Deprecated: Use ParsePayload instead, which returns an error
+// rather than panics if JSON unmarshaling raw payload fails.
+func (e *Event) Payload() (payload interface{}) {
+	var err error
+	payload, err = e.ParsePayload()
+	if err != nil {
+		panic(err)
 	}
 	return payload
 }

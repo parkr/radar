@@ -14,6 +14,12 @@ import (
 type Tree struct {
 	SHA     *string     `json:"sha,omitempty"`
 	Entries []TreeEntry `json:"tree,omitempty"`
+
+	// Truncated is true if the number of items in the tree
+	// exceeded GitHub's maximum limit and the Entries were truncated
+	// in the response. Only populated for requests that fetch
+	// trees like Git.GetTree.
+	Truncated *bool `json:"truncated,omitempty"`
 }
 
 func (t Tree) String() string {
@@ -30,6 +36,7 @@ type TreeEntry struct {
 	Type    *string `json:"type,omitempty"`
 	Size    *int    `json:"size,omitempty"`
 	Content *string `json:"content,omitempty"`
+	URL     *string `json:"url,omitempty"`
 }
 
 func (t TreeEntry) String() string {

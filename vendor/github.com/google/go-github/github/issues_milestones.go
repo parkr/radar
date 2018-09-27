@@ -16,7 +16,7 @@ type Milestone struct {
 	URL          *string    `json:"url,omitempty"`
 	HTMLURL      *string    `json:"html_url,omitempty"`
 	LabelsURL    *string    `json:"labels_url,omitempty"`
-	ID           *int       `json:"id,omitempty"`
+	ID           *int64     `json:"id,omitempty"`
 	Number       *int       `json:"number,omitempty"`
 	State        *string    `json:"state,omitempty"`
 	Title        *string    `json:"title,omitempty"`
@@ -28,6 +28,7 @@ type Milestone struct {
 	UpdatedAt    *time.Time `json:"updated_at,omitempty"`
 	ClosedAt     *time.Time `json:"closed_at,omitempty"`
 	DueOn        *time.Time `json:"due_on,omitempty"`
+	NodeID       *string    `json:"node_id,omitempty"`
 }
 
 func (m Milestone) String() string {
@@ -38,11 +39,11 @@ func (m Milestone) String() string {
 // IssuesService.ListMilestones method.
 type MilestoneListOptions struct {
 	// State filters milestones based on their state. Possible values are:
-	// open, closed. Default is "open".
+	// open, closed, all. Default is "open".
 	State string `url:"state,omitempty"`
 
-	// Sort specifies how to sort milestones. Possible values are: due_date, completeness.
-	// Default value is "due_date".
+	// Sort specifies how to sort milestones. Possible values are: due_on, completeness.
+	// Default value is "due_on".
 	Sort string `url:"sort,omitempty"`
 
 	// Direction in which to sort milestones. Possible values are: asc, desc.
