@@ -12,8 +12,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/go-http-utils/logger"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/gorilla/handlers"
 	"github.com/parkr/radar"
 )
 
@@ -86,6 +86,7 @@ func main() {
 	flag.StringVar(&hourToGenerateRadar, "hour", "03", "Hour of day (01-23) to generate the radar message.")
 	flag.Parse()
 
+	mux := http.NewServeMux()
 	radarItemsService := getRadarItemsService()
 
 	emailHandler := radar.NewEmailHandler(
@@ -93,11 +94,11 @@ func main() {
 		strings.Split(os.Getenv("RADAR_ALLOWED_SENDERS"), ","), // Allowed senders (email addresses)
 		debug, // Whether in debug mode
 	)
-	http.Handle("/emails", handlers.LoggingHandler(os.Stdout, emailHandler))
-	http.Handle("/email", handlers.LoggingHandler(os.Stdout, emailHandler))
+	mux.Handle("/emails", emailHandler)
+	mux.Handle("/email", emailHandler)
 
 	apiHandler := radar.NewAPIHandler(radarItemsService, debug)
-	http.Handle("/api*", handlers.LoggingHandler(os.Stdout, apiHandler))
+	mux.Handle("/api/", apiHandler)
 
 	go emailHandler.Start()
 
@@ -117,7 +118,7 @@ func main() {
 	}()
 
 	log.Println("Starting server on", binding)
-	server := &http.Server{Addr: binding}
+	server := &http.Server{Addr: binding, Handler: logger.Handler(mux, os.Stderr, logger.TinyLoggerType)}
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
@@ -138,5 +139,7 @@ func main() {
 		}
 	}()
 
-	log.Println(server.ListenAndServe())
+	if err := server.ListenAndServe(); err != nil {
+		log.Println("error listening:", err)
+	}
 }

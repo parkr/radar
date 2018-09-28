@@ -49,7 +49,7 @@ func (h APIHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Error(w, "404 not found", http.StatusNotFound)
+	h.Error(w, "404 not found at all", http.StatusNotFound)
 }
 
 func (h APIHandler) CreateRadarItem(w http.ResponseWriter, r *http.Request) {

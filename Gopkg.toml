@@ -29,7 +29,7 @@
   branch = "master"
 
 [[constraint]]
-  name = "github.com/gorilla/handlers"
+  name = "github.com/go-http-utils/logger"
   branch = "master"
 
 [[constraint]]

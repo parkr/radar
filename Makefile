@@ -10,6 +10,9 @@ test:
 	go test github.com/parkr/radar/...
 	go vet github.com/parkr/radar/...
 
+server: build
+	$(shell RADAR_MYSQL_URL='root@/radar_development?parseTime=true' radar -http="localhost:8291" -debug)
+
 docker-build: all
 	docker build -t $(DOCKER_IMAGE) .
 
