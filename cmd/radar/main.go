@@ -17,6 +17,13 @@ import (
 	"github.com/parkr/radar"
 )
 
+type loggerLogger struct{}
+
+func (l loggerLogger) Write(data []byte) (int, error) {
+	log.Print(string(data))
+	return len(data), nil
+}
+
 func getDB() *sql.DB {
 	db, err := sql.Open("mysql", os.Getenv("RADAR_MYSQL_URL"))
 	if err != nil {
@@ -118,7 +125,7 @@ func main() {
 	}()
 
 	log.Println("Starting server on", binding)
-	server := &http.Server{Addr: binding, Handler: logger.Handler(mux, os.Stderr, logger.TinyLoggerType)}
+	server := &http.Server{Addr: binding, Handler: logger.Handler(mux, loggerLogger{}, logger.TinyLoggerType)}
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
