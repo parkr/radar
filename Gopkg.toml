@@ -29,10 +29,6 @@
   branch = "master"
 
 [[constraint]]
-  name = "github.com/go-http-utils/logger"
-  branch = "master"
-
-[[constraint]]
   name = "github.com/google/go-github"
   branch = "master"
 
@@ -47,6 +43,14 @@
 [[constraint]]
   name = "golang.org/x/oauth2"
   branch = "master"
+
+[[constraint]]
+  name = "github.com/technoweenie/grohl"
+  branch = "master"
+
+[[constraint]]
+  name = "github.com/mailgun/mailgun-go"
+  version = "v1.1.0"
 
 [prune]
   go-tests = true

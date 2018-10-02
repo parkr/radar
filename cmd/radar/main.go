@@ -12,23 +12,36 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	mailgun "github.com/mailgun/mailgun-go"
 	"github.com/parkr/radar"
 	"github.com/technoweenie/grohl"
 )
 
-func getDB() *sql.DB {
+func getDB() (*sql.DB, error) {
 	db, err := sql.Open("mysql", os.Getenv("RADAR_MYSQL_URL"))
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	if err = db.Ping(); err != nil {
-		panic(err)
+		return db, err
 	}
-	return db
+	return db, nil
 }
 
 func getRadarItemsService() radar.RadarItemsService {
-	return radar.RadarItemsService{Database: getDB()}
+	db, err := getDB()
+	if err != nil {
+		radar.Printf("error connecting to mysql: %+v", err)
+	}
+	return radar.RadarItemsService{Database: db}
+}
+
+func getMailgunService() radar.MailgunService {
+	mg, err := mailgun.NewMailgunFromEnv()
+	if err != nil {
+		radar.Println("unable to fetch mailgun from env:", err)
+	}
+	return radar.NewMailgunService(mg, os.Getenv("MG_FROM_EMAIL"))
 }
 
 func radarGenerator(radarItemsService radar.RadarItemsService, trigger chan os.Signal, hourToGenerateRadar string) {
@@ -93,6 +106,7 @@ func main() {
 
 	emailHandler := radar.NewEmailHandler(
 		radarItemsService, // RadarItemsService
+		getMailgunService(),
 		strings.Split(os.Getenv("RADAR_ALLOWED_SENDERS"), ","), // Allowed senders (email addresses)
 		debug, // Whether in debug mode
 	)

@@ -3,7 +3,6 @@ package radar
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"net/mail"
 	"time"
@@ -11,12 +10,13 @@ import (
 	"github.com/mvdan/xurls"
 )
 
-func NewEmailHandler(radarItemsService RadarItemsService, allowedSenders []string, debug bool) EmailHandler {
+func NewEmailHandler(radarItemsService RadarItemsService, mailgunService MailgunService, allowedSenders []string, debug bool) EmailHandler {
 	return EmailHandler{
 		AllowedSenders: allowedSenders,
 		Debug:          debug,
 		RadarItems:     radarItemsService,
-		CreateQueue:    make(chan string, 10),
+		Mailgun:        mailgunService,
+		CreateQueue:    make(chan createRequest, 10),
 	}
 }
 
@@ -30,17 +30,32 @@ type EmailHandler struct {
 	// RadarItem service
 	RadarItems RadarItemsService
 
+	// Mailgun service, used for sending email replies
+	Mailgun MailgunService
+
 	// The queue
-	CreateQueue chan string
+	CreateQueue chan createRequest
 }
 
+type createRequest struct {
+	fromEmail string
+
+	messageID string
+
+	subject string
+
+	url string
+}
+
+// Start polls on the CreateQueue and runs
 func (h EmailHandler) Start() {
-	for url := range h.CreateQueue {
+	for req := range h.CreateQueue {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		if err := h.RadarItems.Create(ctx, RadarItem{URL: url}); err != nil {
-			log.Printf("error saving '%s': %#v %+v", url, err, err)
+		if err := h.RadarItems.Create(ctx, RadarItem{URL: req.url}); err != nil {
+			Printf("error saving '%s': %#v %+v", req.url, err, err)
 		} else {
-			log.Printf("saved url=%s to database", url)
+			h.Mailgun.SendReply(req, "Added "+req.url+" to the radar.")
+			Printf("saved url=%s to database", req.url)
 		}
 		cancel()
 	}
@@ -54,7 +69,7 @@ func (h EmailHandler) Shutdown(ctx context.Context) {
 func (h EmailHandler) IsAllowedSender(sender string) bool {
 	email, err := mail.ParseAddress(sender)
 	if err != nil {
-		log.Printf("could not process sender '%s': %#v", sender, err)
+		Printf("could not process sender '%s': %#v", sender, err)
 		return false
 	}
 
@@ -69,20 +84,20 @@ func (h EmailHandler) IsAllowedSender(sender string) bool {
 
 func (h EmailHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if contentType := r.Header.Get("Content-Type"); contentType != "application/x-www-form-urlencoded" {
-		log.Println("don't know how to handle Content-Type:", contentType)
+		Println("don't know how to handle Content-Type:", contentType)
 		http.Error(w, "cannot process Content-Type: "+contentType, http.StatusBadRequest)
 		return
 	}
 
 	if sender := r.FormValue("From"); !h.IsAllowedSender(sender) {
-		log.Println("not an allowed sender: ", sender)
+		Println("not an allowed sender: ", sender)
 		http.Error(w, "not an allowed sender: "+sender, http.StatusUnauthorized)
 		return
 	}
 
 	emailBody := r.FormValue("body-plain")
 	if h.Debug {
-		log.Printf("body-plain: %#v", emailBody)
+		Printf("body-plain: %#v", emailBody)
 	}
 
 	var urls []string
@@ -91,17 +106,23 @@ func (h EmailHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(urls) == 0 {
-		log.Println("no urls in body: ", emailBody)
+		Println("no urls in body: ", emailBody)
 		http.Error(w, "no urls present in email body", http.StatusOK)
 		return
 	}
 
 	if h.Debug {
-		log.Printf("urls: %#v", urls)
+		Printf("urls: %#v", urls)
+		Printf("form: %#v", r.Form)
 	}
 
 	for _, url := range urls {
-		h.CreateQueue <- url
+		h.CreateQueue <- createRequest{
+			fromEmail: r.FormValue("From"),
+			messageID: "foo",
+			subject:   r.FormValue("Subject"),
+			url:       url,
+		}
 	}
 
 	http.Error(w, fmt.Sprintf("added %d urls to today's radar", len(urls)), http.StatusCreated)

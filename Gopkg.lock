@@ -3,14 +3,6 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:3830db69d1ddb5974fee06b6f657b2084de719a6b345aa24e6e84c8ab74f4838"
-  name = "github.com/go-http-utils/logger"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "f3a42dcdeae6e445c9e986b7fda289d98db10414"
-
-[[projects]]
-  branch = "master"
   digest = "1:70a20b8adf085489a342d033b68b7fc27f4017c51e015b857387249493ee0561"
   name = "github.com/go-sql-driver/mysql"
   packages = ["."]
@@ -42,6 +34,14 @@
   version = "v1.0.0"
 
 [[projects]]
+  digest = "1:c30b57e29c4382537286c27e1e4e9b3fb7aa6a4313d0d80b638884c2c3e75d2d"
+  name = "github.com/mailgun/mailgun-go"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "a4002e2df2e8ca2da6a6fbb4a72871b504e49f50"
+  version = "v1.1.0"
+
+[[projects]]
   digest = "1:a7c01f7cf3aa0cfb633ed91d781fca7bf6a9c95d9ccec4d2ec3fb7deee872967"
   name = "github.com/mvdan/xurls"
   packages = ["."]
@@ -56,6 +56,14 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "c059e472caf75dbe73903f6521a20abac245b17f"
+
+[[projects]]
+  branch = "master"
+  digest = "1:aefab08b3a26d7f645206ed64602411dcc0e646271d6296663821812cc53c61e"
+  name = "github.com/technoweenie/grohl"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "f4613feb389efa6e147b705e2671ad4e42bb7ac3"
 
 [[projects]]
   branch = "master"
@@ -100,11 +108,12 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/go-http-utils/logger",
     "github.com/go-sql-driver/mysql",
     "github.com/google/go-github/github",
+    "github.com/mailgun/mailgun-go",
     "github.com/mvdan/xurls",
     "github.com/pkg/errors",
+    "github.com/technoweenie/grohl",
     "golang.org/x/oauth2",
   ]
   solver-name = "gps-cdcl"
