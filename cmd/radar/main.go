@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"flag"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -12,17 +11,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/go-http-utils/logger"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/parkr/radar"
+	"github.com/technoweenie/grohl"
 )
-
-type loggerLogger struct{}
-
-func (l loggerLogger) Write(data []byte) (int, error) {
-	log.Print(string(data))
-	return len(data), nil
-}
 
 func getDB() *sql.DB {
 	db, err := sql.Open("mysql", os.Getenv("RADAR_MYSQL_URL"))
@@ -41,36 +33,36 @@ func getRadarItemsService() radar.RadarItemsService {
 
 func radarGenerator(radarItemsService radar.RadarItemsService, trigger chan os.Signal, hourToGenerateRadar string) {
 	if len(hourToGenerateRadar) != 2 {
-		log.Printf("NOT generating radar. Hour to generate is not in 24-hr time: '%s'", hourToGenerateRadar)
+		radar.Printf("NOT generating radar. Hour to generate is not in 24-hr time: '%s'", hourToGenerateRadar)
 		return
 	}
 
 	githubToken := os.Getenv("GITHUB_ACCESS_TOKEN")
 	if githubToken == "" {
-		log.Println("NOT generating radar. GITHUB_ACCESS_TOKEN not set.")
+		radar.Println("NOT generating radar. GITHUB_ACCESS_TOKEN not set.")
 		return
 	}
 
 	radarRepo := os.Getenv("RADAR_REPO")
 	if githubToken == "" {
-		log.Println("NOT generating radar. RADAR_REPO not set.")
+		radar.Println("NOT generating radar. RADAR_REPO not set.")
 		return
 	}
 
 	mention := os.Getenv("RADAR_MENTION")
 	if mention == "" {
-		log.Println("RADAR_MENTION is empty. Just so you know.")
+		radar.Println("RADAR_MENTION is empty. Just so you know.")
 	}
 
-	log.Printf("Will generate radar at %s:00 every day.", hourToGenerateRadar)
+	radar.Printf("Will generate radar at %s:00 every day.", hourToGenerateRadar)
 
 	for signal := range trigger {
 		thisHour := time.Now().Format("15")
 		if thisHour == hourToGenerateRadar || signal == syscall.SIGUSR2 {
-			log.Println("The time has come: let's generate the radar!")
+			radar.Println("The time has come: let's generate the radar!")
 			generateRadar(radarItemsService, githubToken, radarRepo, mention)
 		} else {
-			log.Printf("Wrong hour to generate! %s != %s", thisHour, hourToGenerateRadar)
+			radar.Printf("Wrong hour to generate! %s != %s", thisHour, hourToGenerateRadar)
 		}
 	}
 }
@@ -78,9 +70,9 @@ func radarGenerator(radarItemsService radar.RadarItemsService, trigger chan os.S
 func generateRadar(radarItemsService radar.RadarItemsService, githubToken, radarRepo, mention string) {
 	issue, err := radar.GenerateRadarIssue(radarItemsService, githubToken, radarRepo, mention)
 	if err == nil {
-		log.Printf("Generated new radar issue: %s", *issue.HTMLURL)
+		radar.Printf("Generated new radar issue: %s", *issue.HTMLURL)
 	} else {
-		log.Printf("Couldn't generate new radar issue: %#v", err)
+		radar.Printf("Couldn't generate new radar issue: %#v", err)
 	}
 }
 
@@ -92,6 +84,9 @@ func main() {
 	var hourToGenerateRadar string
 	flag.StringVar(&hourToGenerateRadar, "hour", "03", "Hour of day (01-23) to generate the radar message.")
 	flag.Parse()
+
+	grohl.SetLogger(grohl.NewIoLogger(os.Stderr))
+	grohl.SetStatter(nil, 0, "")
 
 	mux := http.NewServeMux()
 	radarItemsService := getRadarItemsService()
@@ -106,6 +101,8 @@ func main() {
 
 	apiHandler := radar.NewAPIHandler(radarItemsService, debug)
 	mux.Handle("/api/", apiHandler)
+
+	mux.Handle("/health", radar.NewHealthHandler(radarItemsService))
 
 	go emailHandler.Start()
 
@@ -124,29 +121,29 @@ func main() {
 		}
 	}()
 
-	log.Println("Starting server on", binding)
-	server := &http.Server{Addr: binding, Handler: logger.Handler(mux, loggerLogger{}, logger.TinyLoggerType)}
+	radar.Println("Starting server on", binding)
+	server := &http.Server{Addr: binding, Handler: radar.LoggingHandler(mux)}
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	go func() {
 		for sig := range c {
 			// sig is a ^C, handle it
-			log.Printf("Received signal %#v!", sig)
+			radar.Printf("Received signal %#v!", sig)
 			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 			defer cancel()
 			close(radarC)
 			ticker.Stop()
-			log.Println("Closing database connection...")
+			radar.Println("Closing database connection...")
 			radarItemsService.Shutdown(ctx)
 			emailHandler.Shutdown(ctx)
-			log.Println("Telling server to shutdown...")
+			radar.Println("Telling server to shutdown...")
 			server.Shutdown(ctx)
-			log.Println("Done with graceful shutdown.")
+			radar.Println("Done with graceful shutdown.")
 		}
 	}()
 
 	if err := server.ListenAndServe(); err != nil {
-		log.Println("error listening:", err)
+		radar.Println("error listening:", err)
 	}
 }
