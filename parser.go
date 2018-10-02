@@ -35,13 +35,12 @@ func titleForWebpage(urlString string) string {
 		}
 	}
 
-	if isBinaryResource(u) {
-		return "File on " + u.Hostname()
-	}
-
 	resp, err := http.Get(u.String())
 	if err != nil {
 		return "A page on " + u.Hostname()
+	}
+	if isBinaryResource(resp, u) {
+		return "File on " + u.Hostname()
 	}
 	defer resp.Body.Close()
 
@@ -105,7 +104,20 @@ var parsableExtensions = map[string]bool{
 	".htm":   true,
 }
 
-func isBinaryResource(u *url.URL) bool {
+var parsableContentTypes = []string{
+	"text/html", "text/xhtml", "text/xml",
+}
+
+func isBinaryResource(resp *http.Response, u *url.URL) bool {
+	if contentType := resp.Header.Get("Content-Type"); contentType != "" {
+		for _, parsableContentType := range parsableContentTypes {
+			if strings.Contains(contentType, parsableContentType) {
+				return false
+			}
+		}
+		return true
+	}
+
 	ext := path.Ext(u.Path)
 	_, ok := parsableExtensions[ext]
 	return !ok
