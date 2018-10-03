@@ -53,6 +53,7 @@ func (h EmailHandler) Start() {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		if err := h.RadarItems.Create(ctx, RadarItem{URL: req.url}); err != nil {
 			Printf("error saving '%s': %#v %+v", req.url, err, err)
+			h.Mailgun.SendReply(req, "Could not save "+req.url+" to the radar: "+err.Error())
 		} else {
 			h.Mailgun.SendReply(req, "Added "+req.url+" to the radar.")
 			Printf("saved url=%s to database", req.url)
@@ -119,7 +120,7 @@ func (h EmailHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	for _, url := range urls {
 		h.CreateQueue <- createRequest{
 			fromEmail: r.FormValue("From"),
-			messageID: "foo",
+			messageID: r.FormValue("Message-Id"),
 			subject:   r.FormValue("Subject"),
 			url:       url,
 		}
