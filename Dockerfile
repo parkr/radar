@@ -1,4 +1,4 @@
-FROM golang:1.11 AS build
+FROM golang AS build
 WORKDIR /go/src/github.com/parkr/radar
 ADD . .
 RUN go version
