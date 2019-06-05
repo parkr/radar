@@ -34,6 +34,14 @@
   version = "v1.0.0"
 
 [[projects]]
+  digest = "1:582b704bebaa06b48c29b0cec224a6058a09c86883aaddabde889cd1a5f73e1b"
+  name = "github.com/google/uuid"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "0cd6bf5da1e1c83f8b45653022c74f71af0538a4"
+  version = "v1.1.1"
+
+[[projects]]
   digest = "1:c30b57e29c4382537286c27e1e4e9b3fb7aa6a4313d0d80b638884c2c3e75d2d"
   name = "github.com/mailgun/mailgun-go"
   packages = ["."]
@@ -110,6 +118,7 @@
   input-imports = [
     "github.com/go-sql-driver/mysql",
     "github.com/google/go-github/github",
+    "github.com/google/uuid",
     "github.com/mailgun/mailgun-go",
     "github.com/mvdan/xurls",
     "github.com/pkg/errors",

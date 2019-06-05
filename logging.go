@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"time"
 
+	"github.com/google/uuid"
 	"github.com/technoweenie/grohl"
 )
 
@@ -23,7 +23,7 @@ type loggingHandler struct {
 func (h loggingHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	logCtx := grohl.NewContext(grohl.Data{
 		"url":        r.URL.Path,
-		"request_id": time.Now().UnixNano(),
+		"request_id": uuid.New().String(),
 	})
 	logCtx.SetStatter(nil, 0, "")
 	timer := logCtx.Timer(grohl.Data{})
