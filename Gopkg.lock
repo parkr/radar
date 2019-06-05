@@ -50,12 +50,12 @@
   version = "v1.1.0"
 
 [[projects]]
-  digest = "1:a7c01f7cf3aa0cfb633ed91d781fca7bf6a9c95d9ccec4d2ec3fb7deee872967"
+  digest = "1:0d72291ecb10a37e75f0484eb8e700b0cffbd2501f6e63b282028dcc7830d33c"
   name = "github.com/mvdan/xurls"
   packages = ["."]
   pruneopts = "UT"
-  revision = "d315b61cf6727664f310fa87b3197e9faf2a8513"
-  version = "v1.1.0"
+  revision = "e52e821cbfe8fe163ff6f8628ab5869b11fc05af"
+  version = "v2.0.0"
 
 [[projects]]
   branch = "master"
