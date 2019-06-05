@@ -59,11 +59,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:dfaa0b3a26f4df00ac2edaa90d231d394ff58e040c25cbc4cea3255e07c904e4"
+  digest = "1:deff41c4160cc5b487a1d1a69a58925f2d3ac11befa0692b50e76940594e20f5"
   name = "github.com/pkg/errors"
   packages = ["."]
   pruneopts = "UT"
-  revision = "c059e472caf75dbe73903f6521a20abac245b17f"
+  revision = "27936f6d90f9c8e1145f11ed52ffffbfdb9e0af7"
 
 [[projects]]
   branch = "master"
