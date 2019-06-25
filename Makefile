@@ -19,10 +19,10 @@ docker-build: all
 docker-test: all docker-build
 	docker run --rm \
 	  --name radar \
-	  -e RADAR_HEALTHCHECK_URL=http://localhost:8291/health \
+	  -e RADAR_HEALTHCHECK_URL=http://0.0.0.0:8291/health \
 	  -e RADAR_MYSQL_URL=root@/radar_development?parseTime=true \
 	  $(DOCKER_IMAGE) \
-	  radar -http="localhost:8291" -debug
+	  radar -http=":8291" -debug
 
 
 docker-release: all docker-build
