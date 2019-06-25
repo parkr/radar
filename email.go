@@ -102,7 +102,7 @@ func (h EmailHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var urls []string
-	if matches := xurls.Strict.FindAllString(emailBody, -1); matches != nil && len(matches) > 0 {
+	if matches := xurls.Strict().FindAllString(emailBody, -1); matches != nil && len(matches) > 0 {
 		urls = append(urls, matches...)
 	}
 
