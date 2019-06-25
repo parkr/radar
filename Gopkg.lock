@@ -3,17 +3,17 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:783d985ffb1affe60a210e8620e25a8cd41475940ce19a3a7bab25c795b899fe"
+  digest = "1:3c1186605e9a62452527416429d5f5c4c0d1c81350f3de0a9aeaae9b8e041739"
   name = "github.com/go-sql-driver/mysql"
   packages = ["."]
-  pruneopts = "UT"
+  pruneopts = "NUT"
   revision = "877a9775f06853f611fb2d4e817d92479242d1cd"
 
 [[projects]]
-  digest = "1:d29ee5ef14a7e0253facd0bcebe6a69a7a4e02a67eb24d2aacd8ccb4a7cea6fc"
+  digest = "1:53151cc4366e3945282d4b783fd41f35222cabbc75601e68d8133648c63498d1"
   name = "github.com/gobuffalo/envy"
   packages = ["."]
-  pruneopts = "UT"
+  pruneopts = "NUT"
   revision = "043cb4b8af871b49563291e32c66bb84378a60ac"
   version = "v1.7.0"
 
@@ -21,64 +21,64 @@
   digest = "1:97df918963298c287643883209a2c3f642e6593379f97ab400c2a2e219ab647d"
   name = "github.com/golang/protobuf"
   packages = ["proto"]
-  pruneopts = "UT"
+  pruneopts = "NUT"
   revision = "aa810b61a9c79d51363740d207bb46cf8e620ed5"
   version = "v1.2.0"
 
 [[projects]]
-  branch = "master"
   digest = "1:dc8f33fafa8072398474e182c9c7dfcd6f1b7c688d78c779f7d19a18720ea5dc"
   name = "github.com/google/go-github"
   packages = ["github"]
-  pruneopts = "UT"
+  pruneopts = "NUT"
   revision = "445d3bd422a8e75398ca4c1a6a287d05056f4068"
+  version = "v26.0.8"
 
 [[projects]]
   digest = "1:a63cff6b5d8b95638bfe300385d93b2a6d9d687734b863da8e09dc834510a690"
   name = "github.com/google/go-querystring"
   packages = ["query"]
-  pruneopts = "UT"
+  pruneopts = "NUT"
   revision = "44c6ddd0a2342c386950e880b658017258da92fc"
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:582b704bebaa06b48c29b0cec224a6058a09c86883aaddabde889cd1a5f73e1b"
+  digest = "1:ab3ec1fe3e39bac4b3ab63390767766622be35b7cab03f47f787f9ec60522a53"
   name = "github.com/google/uuid"
   packages = ["."]
-  pruneopts = "UT"
+  pruneopts = "NUT"
   revision = "0cd6bf5da1e1c83f8b45653022c74f71af0538a4"
   version = "v1.1.1"
 
 [[projects]]
-  digest = "1:ecd9aa82687cf31d1585d4ac61d0ba180e42e8a6182b85bd785fcca8dfeefc1b"
+  digest = "1:da62aa6632d04e080b8a8b85a59ed9ed1550842a0099a55f3ae3a20d02a3745a"
   name = "github.com/joho/godotenv"
   packages = ["."]
-  pruneopts = "UT"
+  pruneopts = "NUT"
   revision = "23d116af351c84513e1946b527c88823e476be13"
   version = "v1.3.0"
 
 [[projects]]
-  digest = "1:cbd169f49979ba0bc483cd418da756a21bba0081526d8af0fb0e9218deac2a08"
+  digest = "1:c73929cef23da9162aa340049c93f0857c887604ca7e4307449a5f8d52bf1366"
   name = "github.com/mailgun/mailgun-go"
   packages = ["."]
-  pruneopts = "UT"
+  pruneopts = "NUT"
   revision = "4071f66f00fb74b08ae720f28ee9fcd98ebfd69e"
   version = "v2.0.0"
 
 [[projects]]
-  digest = "1:0d72291ecb10a37e75f0484eb8e700b0cffbd2501f6e63b282028dcc7830d33c"
+  digest = "1:63953ffb90bbc880c612d576fcfd973a5904277d25ec9e2d8d5719bf67969662"
   name = "github.com/mvdan/xurls"
   packages = ["."]
-  pruneopts = "UT"
+  pruneopts = "NUT"
   revision = "e52e821cbfe8fe163ff6f8628ab5869b11fc05af"
   version = "v2.0.0"
 
 [[projects]]
   branch = "master"
-  digest = "1:deff41c4160cc5b487a1d1a69a58925f2d3ac11befa0692b50e76940594e20f5"
+  digest = "1:f3bc4dcbd92f5aa52b7e1e598ef696bde6a671ae1732e52511d26f4fd22703eb"
   name = "github.com/pkg/errors"
   packages = ["."]
-  pruneopts = "UT"
+  pruneopts = "NUT"
   revision = "27936f6d90f9c8e1145f11ed52ffffbfdb9e0af7"
 
 [[projects]]
@@ -89,16 +89,16 @@
     "module",
     "semver",
   ]
-  pruneopts = "UT"
+  pruneopts = "NUT"
   revision = "438578804ca6f31be148c27683afc419ce47c06e"
   version = "v1.3.0"
 
 [[projects]]
   branch = "master"
-  digest = "1:aefab08b3a26d7f645206ed64602411dcc0e646271d6296663821812cc53c61e"
+  digest = "1:cc50b6c4b1049aff6763bd064c652fbdf961d51e5c3493d722482c747cfa9820"
   name = "github.com/technoweenie/grohl"
   packages = ["."]
-  pruneopts = "UT"
+  pruneopts = "NUT"
   revision = "f4613feb389efa6e147b705e2671ad4e42bb7ac3"
 
 [[projects]]
@@ -114,7 +114,7 @@
     "openpgp/packet",
     "openpgp/s2k",
   ]
-  pruneopts = "UT"
+  pruneopts = "NUT"
   revision = "cc06ce4a13d484c0101a9e92913248488a75786d"
 
 [[projects]]
@@ -125,22 +125,22 @@
     "context",
     "context/ctxhttp",
   ]
-  pruneopts = "UT"
+  pruneopts = "NUT"
   revision = "4dfa2610cdf3b287375bbba5b8f2a14d3b01d8de"
 
 [[projects]]
   branch = "master"
-  digest = "1:8d1c112fb1679fa097e9a9255a786ee47383fa2549a3da71bcb1334a693ebcfe"
+  digest = "1:f3a2e6d7423b8c19cdb2203cda9672900cc43012ea69f30ff6874dd453f44aec"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
     "internal",
   ]
-  pruneopts = "UT"
+  pruneopts = "NUT"
   revision = "0f29369cfe4552d0e4bcddc57cc75f4d7e672a33"
 
 [[projects]]
-  digest = "1:4b8f3d164fcba1aed1e5ec63edb518b7d436b001f01e06c7f9c2335498b4c5a3"
+  digest = "1:a888504abac6159043fda54f562eed36633b81932c88963ba2a0c0ce281a6fa1"
   name = "google.golang.org/appengine"
   packages = [
     "cloudsql",
@@ -152,7 +152,7 @@
     "internal/urlfetch",
     "urlfetch",
   ]
-  pruneopts = "UT"
+  pruneopts = "NUT"
   revision = "ae0ab99deb4dc413a2b4bd6c8bdd0eb67f1e4d06"
   version = "v1.2.0"
 
