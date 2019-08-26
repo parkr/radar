@@ -30,7 +30,7 @@
 
 [[constraint]]
   name = "github.com/google/go-github"
-  version = ">= 26.0.0, < 27.1.0"
+  version = ">= 26.0.0, < 28.1.0"
 
 [[constraint]]
   name = "github.com/mvdan/xurls"
