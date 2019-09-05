@@ -7,7 +7,7 @@ import (
 	"net/mail"
 	"time"
 
-	"github.com/mvdan/xurls"
+	"mvdan.cc/xurls/v2"
 )
 
 func NewEmailHandler(radarItemsService RadarItemsService, mailgunService MailgunService, allowedSenders []string, debug bool) EmailHandler {
