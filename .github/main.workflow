@@ -26,6 +26,6 @@ action "Login to Docker Registry" {
 
 action "Build & publish" {
   uses = "actions/docker/cli-multi@fe7ed3ce992160973df86480b83a2f8ed581cd50"
-  args = "build -t parkr/radar:$BUILD_SHA . && push parkr/radar:$BUILD_SHA"
+  args = ["build -t parkr/radar:$GITHUB_SHA .", "push parkr/radar:$GITHUB_SHA"]
   needs = ["Login to Docker Registry"]
 }
