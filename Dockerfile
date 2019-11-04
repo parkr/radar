@@ -3,6 +3,7 @@ WORKDIR /go/src/github.com/parkr/radar
 ADD . .
 RUN go version
 RUN CGO_ENABLED=0 go install github.com/parkr/radar/cmd/...
+RUN CGO_ENABLED=0 go test github.com/parkr/radar/...
 
 FROM scratch
 COPY --from=build /go/bin/radar /bin/radar
