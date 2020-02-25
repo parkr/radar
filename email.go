@@ -10,7 +10,20 @@ import (
 	"mvdan.cc/xurls/v2"
 )
 
-func NewEmailHandler(radarItemsService RadarItemsService, mailgunService MailgunService, allowedSenders []string, debug bool) EmailHandler {
+type RadarItemsStorageService interface {
+	// Store a new radar item.
+	Create(ctx context.Context, m RadarItem) error
+	// Delete a radar item by numerical id.
+	Delete(ctx context.Context, id int64) error
+	// Get a radar item by numerical id.
+	Get(ctx context.Context, id int64) (RadarItem, error)
+	// List radar items by numerical id.
+	List(ctx context.Context, limit int) ([]RadarItem, error)
+	// Shut down the storage service gracefully.
+	Shutdown(ctx context.Context)
+}
+
+func NewEmailHandler(radarItemsService RadarItemsStorageService, mailgunService MailgunService, allowedSenders []string, debug bool) EmailHandler {
 	return EmailHandler{
 		AllowedSenders: allowedSenders,
 		Debug:          debug,
@@ -28,7 +41,7 @@ type EmailHandler struct {
 	Debug bool
 
 	// RadarItem service
-	RadarItems RadarItemsService
+	RadarItems RadarItemsStorageService
 
 	// Mailgun service, used for sending email replies
 	Mailgun MailgunService
