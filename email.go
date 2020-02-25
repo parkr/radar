@@ -13,13 +13,7 @@ import (
 type RadarItemsStorageService interface {
 	// Store a new radar item.
 	Create(ctx context.Context, m RadarItem) error
-	// Delete a radar item by numerical id.
-	Delete(ctx context.Context, id int64) error
-	// Get a radar item by numerical id.
-	Get(ctx context.Context, id int64) (RadarItem, error)
-	// List radar items by numerical id.
-	List(ctx context.Context, limit int) ([]RadarItem, error)
-	// Shut down the storage service gracefully.
+	// Shut down the service.
 	Shutdown(ctx context.Context)
 }
 
