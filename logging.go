@@ -22,6 +22,7 @@ type loggingHandler struct {
 
 func (h loggingHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	logCtx := grohl.NewContext(grohl.Data{
+		"method":     r.Method,
 		"url":        r.URL.Path,
 		"request_id": uuid.New().String(),
 	})
