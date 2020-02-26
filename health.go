@@ -51,7 +51,7 @@ func (h healthHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	logCtx := extractLogCtx(r)
+	logCtx := GetLogContext(r)
 	logCtx.Log(resp.ToGrohlData())
 }
 

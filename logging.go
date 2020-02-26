@@ -36,7 +36,8 @@ func LoggingHandler(handler http.Handler) http.Handler {
 	return loggingHandler{handler: handler}
 }
 
-func extractLogCtx(req *http.Request) *grohl.Context {
+// GetLogContext retrieves the grohl logging context for this request.
+func GetLogContext(req *http.Request) *grohl.Context {
 	return req.Context().Value(logCtxKey).(*grohl.Context)
 }
 
