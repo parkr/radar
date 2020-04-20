@@ -14,7 +14,6 @@ require (
 	github.com/onsi/ginkgo v1.10.1 // indirect
 	github.com/onsi/gomega v1.7.0 // indirect
 	github.com/pkg/errors v0.8.2-0.20190227000051-27936f6d90f9
-	github.com/rogpeppe/go-internal v1.3.0 // indirect
 	github.com/technoweenie/grohl v0.0.0-20140924204239-f4613feb389e
 	golang.org/x/net v0.0.0-20190404232315-eb5bcb51f2a3 // indirect
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
