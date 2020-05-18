@@ -18,7 +18,7 @@ func TestJoinLinksIntoBody(t *testing.T) {
 New:
 
 - [ ] [Parker Moore | By Parker](https://byparker.com)
-- [ ] [Julia Evans - Julia Evans](https://jvns.ca)
+- [ ] [Julia Evans](https://jvns.ca)
 
 /cc @parkr
 `
