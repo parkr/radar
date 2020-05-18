@@ -45,6 +45,9 @@ func titleForWebpage(urlString string) string {
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "A page on " + u.Hostname()
+	}
 	matches := titleExtractorRegexp.FindAllStringSubmatch(string(body), -1)
 	if len(matches) < 1 || len(matches[0]) < 2 {
 		return "A page on " + u.Hostname()

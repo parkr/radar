@@ -141,20 +141,19 @@ func main() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	go func() {
-		for sig := range c {
-			// sig is a ^C, handle it
-			radar.Printf("Received signal %#v!", sig)
-			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-			defer cancel()
-			close(radarC)
-			ticker.Stop()
-			radar.Println("Closing database connection...")
-			radarItemsService.Shutdown(ctx)
-			emailHandler.Shutdown(ctx)
-			radar.Println("Telling server to shutdown...")
-			server.Shutdown(ctx)
-			radar.Println("Done with graceful shutdown.")
-		}
+		sig := <-c
+		// sig is a ^C, handle it
+		radar.Printf("Received signal %#v!", sig)
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		close(radarC)
+		ticker.Stop()
+		radar.Println("Closing database connection...")
+		radarItemsService.Shutdown(ctx)
+		emailHandler.Shutdown(ctx)
+		radar.Println("Telling server to shutdown...")
+		_ = server.Shutdown(ctx)
+		radar.Println("Done with graceful shutdown.")
 	}()
 
 	if err := server.ListenAndServe(); err != nil {

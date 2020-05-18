@@ -171,7 +171,7 @@ func extractGitHubLinks(ctx context.Context, client *github.Client, owner, name 
 func getClient(githubToken string) *github.Client {
 	if _, ok := clients[githubToken]; !ok {
 		clients[githubToken] = github.NewClient(oauth2.NewClient(
-			oauth2.NoContext,
+			context.TODO(),
 			oauth2.StaticTokenSource(
 				&oauth2.Token{AccessToken: githubToken},
 			),

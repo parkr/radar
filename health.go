@@ -52,7 +52,7 @@ func (h healthHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	logCtx := GetLogContext(r)
-	logCtx.Log(resp.ToGrohlData())
+	_ = logCtx.Log(resp.ToGrohlData())
 }
 
 // NewHealthHandler returns a handler which provides health-related information.
