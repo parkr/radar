@@ -9,7 +9,7 @@ require (
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gobuffalo/envy v1.7.0 // indirect
 	github.com/google/go-github/v28 v28.1.1
-	github.com/google/uuid v1.1.1
+	github.com/google/uuid v1.1.2
 	github.com/mailgun/mailgun-go v2.0.0+incompatible
 	github.com/onsi/ginkgo v1.10.1 // indirect
 	github.com/onsi/gomega v1.7.0 // indirect
