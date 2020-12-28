@@ -20,6 +20,7 @@ docker-test: docker-build
 	docker run --rm \
 	  --name radar \
 	  -e RADAR_HEALTHCHECK_URL=http://0.0.0.0:8291/health \
+	  -e RADAR_REPO=parkr/radar \
 	  $(DOCKER_IMAGE) \
 	  radar -http=":8291" -debug
 

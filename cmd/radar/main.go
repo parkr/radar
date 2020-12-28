@@ -74,14 +74,10 @@ func main() {
 	mux := http.NewServeMux()
 
 	githubToken := os.Getenv("GITHUB_ACCESS_TOKEN")
-	if githubToken == "" {
-		radar.Println("NOT generating radar. GITHUB_ACCESS_TOKEN not set.")
-		return
-	}
 	radarRepo := os.Getenv("RADAR_REPO")
 	if radarRepo == "" {
-		radar.Println("NOT generating radar. RADAR_REPO not set.")
-		return
+		radar.Println("fatal: RADAR_REPO not set.")
+		os.Exit(1)
 	}
 
 	radarRepoPieces := strings.Split(radarRepo, "/")
