@@ -15,6 +15,7 @@ import (
 	"github.com/technoweenie/grohl"
 )
 
+// getMailgunService creates a Mailgun service from the environment variables.
 func getMailgunService() radar.MailgunService {
 	mg, err := mailgun.NewMailgunFromEnv()
 	if err != nil {
@@ -23,6 +24,7 @@ func getMailgunService() radar.MailgunService {
 	return radar.NewMailgunService(mg, os.Getenv("MG_FROM_EMAIL"))
 }
 
+// radarGenerator handles the signals and filters so only triggers at the given hour of day generates a new radar issue.
 func radarGenerator(radarItemsService radar.RadarItemsService, trigger chan os.Signal, hourToGenerateRadar string) {
 	if len(hourToGenerateRadar) != 2 {
 		radar.Printf("NOT generating radar. Hour to generate is not in 24-hr time: '%s'", hourToGenerateRadar)
@@ -47,6 +49,7 @@ func radarGenerator(radarItemsService radar.RadarItemsService, trigger chan os.S
 	}
 }
 
+// generateRadar generates a new radar issue and logs it, or any errors.
 func generateRadar(radarItemsService radar.RadarItemsService, mention string) {
 	issue, err := radar.GenerateRadarIssue(radarItemsService, mention)
 	if err == nil {
@@ -80,6 +83,7 @@ func main() {
 		radar.Println("NOT generating radar. RADAR_REPO not set.")
 		return
 	}
+
 	radarRepoPieces := strings.Split(radarRepo, "/")
 	radarItemsService := radar.NewRadarItemsService(radar.NewGitHubClient(githubToken), radarRepoPieces[0], radarRepoPieces[1])
 
@@ -127,7 +131,7 @@ func main() {
 		defer cancel()
 		close(radarC)
 		ticker.Stop()
-		radar.Println("Closing database connection...")
+		radar.Println("Shutting down radar items service...")
 		radarItemsService.Shutdown(ctx)
 		emailHandler.Shutdown(ctx)
 		radar.Println("Telling server to shutdown...")
