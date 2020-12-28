@@ -63,7 +63,7 @@ func (h EmailHandler) Start() {
 			h.Mailgun.SendReply(req, "Could not save "+req.url+" to the radar: "+err.Error())
 		} else {
 			h.Mailgun.SendReply(req, "Added "+req.url+" to the radar.")
-			Printf("saved url=%s to database", req.url)
+			Printf("saved url=%s to radar", req.url)
 		}
 		cancel()
 	}

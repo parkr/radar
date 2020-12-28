@@ -1,14 +1,9 @@
 package radar
 
 import (
-	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
-	"strconv"
-	"strings"
-
-	"github.com/pkg/errors"
 )
 
 func NewAPIHandler(radarItemsService RadarItemsService, debug bool) APIHandler {
@@ -44,11 +39,6 @@ func (h APIHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, apiPrefix+"/") {
-		h.GetRadarItem(w, r)
-		return
-	}
-
 	h.Error(w, "404 not found at all", http.StatusNotFound)
 }
 
@@ -72,43 +62,13 @@ func (h APIHandler) CreateRadarItem(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h APIHandler) ListRadarItems(w http.ResponseWriter, r *http.Request) {
-	radarItems, err := h.RadarItems.List(r.Context(), -1)
+	radarItems, err := h.RadarItems.List(r.Context())
 	if err != nil {
 		h.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	err = json.NewEncoder(w).Encode(radarItems)
-	if err != nil {
-		h.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-}
-
-func (h APIHandler) GetRadarItem(w http.ResponseWriter, r *http.Request) {
-	idStr := strings.TrimPrefix(r.URL.Path, apiPrefix)
-	if idStr == "" {
-		h.Error(w, "must submit a numerical id", http.StatusBadRequest)
-		return
-	}
-
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		h.Error(w, "not a numerical id: "+idStr, http.StatusBadRequest)
-		return
-	}
-
-	radarItem, err := h.RadarItems.Get(r.Context(), int64(id))
-	if err != nil {
-		if errors.Cause(err) == sql.ErrNoRows {
-			h.Error(w, "no radar item with id="+idStr, http.StatusNotFound)
-			return
-		}
-		h.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	err = json.NewEncoder(w).Encode(radarItem)
 	if err != nil {
 		h.Error(w, err.Error(), http.StatusInternalServerError)
 		return

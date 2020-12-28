@@ -12,7 +12,7 @@ func TestJoinLinksIntoBody(t *testing.T) {
 
 [*Previously:*](https://github.com/parkr/radar/issues/1)
 
-- [ ] [The world’s leading software development platform · GitHub](https://github.com)
+- [ ] [GitHub: Where the world builds software · GitHub](https://github.com)
 - [ ] [Ben Balter](https://ben.balter.com)
 
 New:

@@ -11,7 +11,7 @@ test:
 	go vet github.com/parkr/radar/...
 
 server: build
-	$(shell RADAR_MYSQL_URL='root@/radar_development?parseTime=true' radar -http="localhost:8291" -debug)
+	$(shell radar -http="localhost:8291" -debug)
 
 docker-build:
 	docker build -t $(DOCKER_IMAGE) .
@@ -20,7 +20,6 @@ docker-test: docker-build
 	docker run --rm \
 	  --name radar \
 	  -e RADAR_HEALTHCHECK_URL=http://0.0.0.0:8291/health \
-	  -e RADAR_MYSQL_URL=root@/radar_development?parseTime=true \
 	  $(DOCKER_IMAGE) \
 	  radar -http=":8291" -debug
 

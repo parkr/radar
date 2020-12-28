@@ -57,7 +57,7 @@ func titleForWebpage(urlString string) string {
 
 func titleForGitHubReference(u *url.URL) string {
 	// Oof.
-	client := getClient(os.Getenv("GITHUB_ACCESS_TOKEN"))
+	client := NewGitHubClient(os.Getenv("GITHUB_ACCESS_TOKEN"))
 	ctx := context.Background()
 
 	// Trim /files from the end and strip / from the beginning.
