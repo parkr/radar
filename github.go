@@ -4,9 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"log"
 	"sort"
-	"strings"
 	"text/template"
 	"time"
 
@@ -38,24 +36,16 @@ type tmplData struct {
 	Mention     string
 }
 
-func GenerateRadarIssue(radarItemsService RadarItemsService, githubToken string, repo, mention string) (*github.Issue, error) {
-	client := getClient(githubToken)
+func GenerateRadarIssue(radarItemsService RadarItemsService, mention string) (*github.Issue, error) {
+	client := radarItemsService.githubClient
+	owner, name := radarItemsService.owner, radarItemsService.repoName
 
 	data := &tmplData{
 		Mention: mention,
 	}
 
-	repoPieces := strings.Split(repo, "/")
-	owner, name := repoPieces[0], repoPieces[1]
-
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
-
-	links, err := radarItemsService.List(ctx, -1)
-	if err != nil {
-		return nil, err
-	}
-	data.NewIssues = links
 
 	previousIssue := getPreviousRadarIssue(ctx, client, owner, name)
 	if previousIssue != nil {
@@ -68,7 +58,7 @@ func GenerateRadarIssue(radarItemsService RadarItemsService, githubToken string,
 
 	body, err := generateBody(data)
 	if err != nil {
-		log.Printf("Couldn't get a radar body: %#v", err)
+		Printf("Couldn't get a radar body: %#v", err)
 		return nil, err
 	}
 
@@ -87,16 +77,7 @@ func GenerateRadarIssue(radarItemsService RadarItemsService, githubToken string,
 			ctx, owner, name, *previousIssue.Number, &github.IssueRequest{State: github.String("closed")},
 		)
 		if err != nil {
-			log.Printf("%s/%s: error closing issue number=%d: %#v", owner, name, *previousIssue.Number, err)
-		}
-	}
-
-	// Delete finished URL's.
-	for _, link := range links {
-		if link.ID > 0 {
-			if err = radarItemsService.Delete(ctx, link.ID); err != nil {
-				log.Printf("%s/%s: error deleting link id=%d: %#v", owner, name, link.ID, err)
-			}
+			Printf("%s/%s: error closing issue number=%d: %#v", owner, name, *previousIssue.Number, err)
 		}
 	}
 
@@ -112,12 +93,12 @@ func getPreviousRadarIssue(ctx context.Context, client *github.Client, owner, na
 	}
 	result, _, err := client.Search.Issues(ctx, query, opts)
 	if err != nil {
-		log.Printf("Error running query '%s': %#v", query, err)
+		Printf("Error running query '%s': %#v", query, err)
 		return nil
 	}
 
 	if len(result.Issues) == 0 {
-		log.Printf("No issues for '%s'.", query)
+		Printf("No issues for '%s'.", query)
 		return nil
 	}
 
@@ -151,7 +132,7 @@ func extractGitHubLinks(ctx context.Context, client *github.Client, owner, name 
 	for {
 		comments, resp, err := client.Issues.ListComments(ctx, owner, name, *issue.Number, opts)
 		if err != nil {
-			log.Printf("Error fetching comments: %#v", err)
+			Printf("Error fetching comments: %#v", err)
 			return items
 		}
 
@@ -168,7 +149,8 @@ func extractGitHubLinks(ctx context.Context, client *github.Client, owner, name 
 	return items
 }
 
-func getClient(githubToken string) *github.Client {
+// NewGitHubClient generates a new GitHub client with the given static token source.
+func NewGitHubClient(githubToken string) *github.Client {
 	if _, ok := clients[githubToken]; !ok {
 		clients[githubToken] = github.NewClient(oauth2.NewClient(
 			context.TODO(),

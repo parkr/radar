@@ -7,7 +7,6 @@ Keep track of links you need to get back to. It creates a GitHub issue every 24 
 Use of the Docker image is recommended. [Check the tags](https://hub.docker.com/r/parkr/radar/tags/) for the one you want, then run:
 
     docker run --rm \
-      -e RADAR_MYSQL_URL=user:pass@host:port/database?parseTime=true \
       -e RADAR_ALLOWED_SENDERS=you@gmail.com \
       -e GITHUB_ACCESS_TOKEN=aaabb \
       -e RADAR_REPO=owner/name \ # where to create the new github issue
@@ -21,7 +20,7 @@ Use of the Docker image is recommended. [Check the tags](https://hub.docker.com/
 
 The `MG_` environment variables allows this server to reply to each incoming email via [Mailgun](https://mailgun.com). Other providers are not supported, but could be with very few modifications.
 
-The only required parameters are: `RADAR_MYSQL_URL`, `RADAR_ALLOWED_SENDERS`, `RADAR_REPO`, and `GITHUB_ACCESS_TOKEN`. All others are optional.
+The only required parameters are: `RADAR_ALLOWED_SENDERS`, `RADAR_REPO`, and `GITHUB_ACCESS_TOKEN`. All others are optional.
 
 The `-http` command line argument provides the bind address. Make sure you update `RADAR_HEALTHCHECK_URL` to match if you modify this.
 

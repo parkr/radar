@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -35,6 +36,10 @@ func titleForWebpage(urlString string) string {
 		}
 	}
 
+	if isPrivateHost(u.Hostname()) {
+		return "A private page on " + u.Hostname()
+	}
+
 	resp, err := http.Get(u.String())
 	if err != nil {
 		return "A page on " + u.Hostname()
@@ -57,7 +62,7 @@ func titleForWebpage(urlString string) string {
 
 func titleForGitHubReference(u *url.URL) string {
 	// Oof.
-	client := getClient(os.Getenv("GITHUB_ACCESS_TOKEN"))
+	client := NewGitHubClient(os.Getenv("GITHUB_ACCESS_TOKEN"))
 	ctx := context.Background()
 
 	// Trim /files from the end and strip / from the beginning.
@@ -135,4 +140,47 @@ func extractLinkedTodosFromMarkdown(body string) []RadarItem {
 		items = append(items, RadarItem{Title: match[1], URL: match[2]})
 	}
 	return items
+}
+
+var privateIPBlocks []*net.IPNet
+
+func init() {
+	for _, cidr := range []string{
+		"127.0.0.0/8",    // IPv4 loopback
+		"10.0.0.0/8",     // RFC1918
+		"172.16.0.0/12",  // RFC1918
+		"192.168.0.0/16", // RFC1918
+		"169.254.0.0/16", // RFC3927 link-local
+		"::1/128",        // IPv6 loopback
+		"fe80::/10",      // IPv6 link-local
+		"fc00::/7",       // IPv6 unique local addr
+	} {
+		_, block, err := net.ParseCIDR(cidr)
+		if err != nil {
+			panic(fmt.Errorf("parse error on %q: %v", cidr, err))
+		}
+		privateIPBlocks = append(privateIPBlocks, block)
+	}
+}
+
+func isPrivateIP(ip net.IP) bool {
+	if ip.IsLoopback() || ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() {
+		return true
+	}
+
+	for _, block := range privateIPBlocks {
+		if block.Contains(ip) {
+			return true
+		}
+	}
+	return false
+}
+
+func isPrivateHost(hostname string) bool {
+	addr := net.ParseIP(hostname)
+	if addr != nil {
+		return isPrivateIP(addr)
+	}
+
+	return hostname == "localhost" || strings.HasSuffix(hostname, ".local") || strings.HasSuffix(hostname, ".localhost")
 }

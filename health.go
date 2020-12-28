@@ -2,7 +2,6 @@ package radar
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"net/http"
 
@@ -16,34 +15,23 @@ type healthHandler struct {
 // HealthResponse is the struct representing the JSON returned from the /health endpoint.
 type HealthResponse struct {
 	Ok bool
-	DB bool
 }
 
 // ToGrohlData returns grohl data for this health response.
 func (r HealthResponse) ToGrohlData() grohl.Data {
 	return grohl.Data{
 		"ok": r.Ok,
-		"db": r.DB,
 	}
 }
 
-func newHealthResponse(ctx context.Context, db *sql.DB) HealthResponse {
-	if db == nil {
-		return HealthResponse{
-			Ok: false,
-			DB: false,
-		}
-	}
-
-	err := db.PingContext(ctx)
+func newHealthResponse(ctx context.Context) HealthResponse {
 	return HealthResponse{
-		Ok: err == nil,
-		DB: err == nil,
+		Ok: true,
 	}
 }
 
 func (h healthHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	resp := newHealthResponse(r.Context(), h.svc.Database)
+	resp := newHealthResponse(r.Context())
 	if !resp.Ok {
 		w.WriteHeader(http.StatusBadGateway)
 	}

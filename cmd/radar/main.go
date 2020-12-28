@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"flag"
 	"net/http"
 	"os"
@@ -11,31 +10,12 @@ import (
 	"syscall"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql"
 	mailgun "github.com/mailgun/mailgun-go"
 	"github.com/parkr/radar"
 	"github.com/technoweenie/grohl"
 )
 
-func getDB() (*sql.DB, error) {
-	db, err := sql.Open("mysql", os.Getenv("RADAR_MYSQL_URL"))
-	if err != nil {
-		return nil, err
-	}
-	if err = db.Ping(); err != nil {
-		return db, err
-	}
-	return db, nil
-}
-
-func getRadarItemsService() radar.RadarItemsService {
-	db, err := getDB()
-	if err != nil {
-		radar.Printf("error connecting to mysql: %+v", err)
-	}
-	return radar.RadarItemsService{Database: db}
-}
-
+// getMailgunService creates a Mailgun service from the environment variables.
 func getMailgunService() radar.MailgunService {
 	mg, err := mailgun.NewMailgunFromEnv()
 	if err != nil {
@@ -44,21 +24,10 @@ func getMailgunService() radar.MailgunService {
 	return radar.NewMailgunService(mg, os.Getenv("MG_FROM_EMAIL"))
 }
 
+// radarGenerator handles the signals and filters so only triggers at the given hour of day generates a new radar issue.
 func radarGenerator(radarItemsService radar.RadarItemsService, trigger chan os.Signal, hourToGenerateRadar string) {
 	if len(hourToGenerateRadar) != 2 {
 		radar.Printf("NOT generating radar. Hour to generate is not in 24-hr time: '%s'", hourToGenerateRadar)
-		return
-	}
-
-	githubToken := os.Getenv("GITHUB_ACCESS_TOKEN")
-	if githubToken == "" {
-		radar.Println("NOT generating radar. GITHUB_ACCESS_TOKEN not set.")
-		return
-	}
-
-	radarRepo := os.Getenv("RADAR_REPO")
-	if githubToken == "" {
-		radar.Println("NOT generating radar. RADAR_REPO not set.")
 		return
 	}
 
@@ -73,15 +42,16 @@ func radarGenerator(radarItemsService radar.RadarItemsService, trigger chan os.S
 		thisHour := time.Now().Format("15")
 		if thisHour == hourToGenerateRadar || signal == syscall.SIGUSR2 {
 			radar.Println("The time has come: let's generate the radar!")
-			generateRadar(radarItemsService, githubToken, radarRepo, mention)
+			generateRadar(radarItemsService, mention)
 		} else {
 			radar.Printf("Wrong hour to generate! %s != %s", thisHour, hourToGenerateRadar)
 		}
 	}
 }
 
-func generateRadar(radarItemsService radar.RadarItemsService, githubToken, radarRepo, mention string) {
-	issue, err := radar.GenerateRadarIssue(radarItemsService, githubToken, radarRepo, mention)
+// generateRadar generates a new radar issue and logs it, or any errors.
+func generateRadar(radarItemsService radar.RadarItemsService, mention string) {
+	issue, err := radar.GenerateRadarIssue(radarItemsService, mention)
 	if err == nil {
 		radar.Printf("Generated new radar issue: %s", *issue.HTMLURL)
 	} else {
@@ -102,7 +72,16 @@ func main() {
 	grohl.SetStatter(nil, 0, "")
 
 	mux := http.NewServeMux()
-	radarItemsService := getRadarItemsService()
+
+	githubToken := os.Getenv("GITHUB_ACCESS_TOKEN")
+	radarRepo := os.Getenv("RADAR_REPO")
+	if radarRepo == "" {
+		radar.Println("fatal: RADAR_REPO not set.")
+		os.Exit(1)
+	}
+
+	radarRepoPieces := strings.Split(radarRepo, "/")
+	radarItemsService := radar.NewRadarItemsService(radar.NewGitHubClient(githubToken), radarRepoPieces[0], radarRepoPieces[1])
 
 	emailHandler := radar.NewEmailHandler(
 		radarItemsService, // RadarItemsService
@@ -148,7 +127,7 @@ func main() {
 		defer cancel()
 		close(radarC)
 		ticker.Stop()
-		radar.Println("Closing database connection...")
+		radar.Println("Shutting down radar items service...")
 		radarItemsService.Shutdown(ctx)
 		emailHandler.Shutdown(ctx)
 		radar.Println("Telling server to shutdown...")
