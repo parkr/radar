@@ -8,7 +8,7 @@ require (
 	github.com/facebookgo/subset v0.0.0-20150612182917-8dac2c3c4870 // indirect
 	github.com/gobuffalo/envy v1.7.0 // indirect
 	github.com/google/go-github/v28 v28.1.1
-	github.com/google/uuid v1.1.2
+	github.com/google/uuid v1.1.3
 	github.com/mailgun/mailgun-go v2.0.0+incompatible
 	github.com/onsi/ginkgo v1.10.1 // indirect
 	github.com/onsi/gomega v1.7.0 // indirect
