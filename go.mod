@@ -10,13 +10,10 @@ require (
 	github.com/google/go-github/v28 v28.1.1
 	github.com/google/uuid v1.3.0
 	github.com/mailgun/mailgun-go v2.0.0+incompatible
-	github.com/onsi/ginkgo v1.10.1 // indirect
-	github.com/onsi/gomega v1.7.0 // indirect
+	github.com/onsi/gomega v1.19.0 // indirect
 	github.com/pkg/errors v0.8.2-0.20190227000051-27936f6d90f9
 	github.com/technoweenie/grohl v0.0.0-20140924204239-f4613feb389e
-	golang.org/x/net v0.0.0-20190404232315-eb5bcb51f2a3 // indirect
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
-	golang.org/x/sys v0.0.0-20190412213103-97732733099d // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	mvdan.cc/xurls/v2 v2.4.0
 )
