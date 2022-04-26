@@ -14,6 +14,6 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/technoweenie/grohl v0.0.0-20140924204239-f4613feb389e
 	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5
-	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
+	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	mvdan.cc/xurls/v2 v2.4.0
 )
