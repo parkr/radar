@@ -13,7 +13,7 @@ require (
 	github.com/onsi/gomega v1.19.0 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/technoweenie/grohl v0.0.0-20140924204239-f4613feb389e
-	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
+	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	mvdan.cc/xurls/v2 v2.4.0
 )
