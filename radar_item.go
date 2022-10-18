@@ -33,6 +33,10 @@ func (r *RadarItem) GetHostname() string {
 	return r.parsedURL.Hostname()
 }
 
+func (r *RadarItem) GetMarkdown() string {
+	return "[" + r.GetTitle() + "](" + r.URL + ")"
+}
+
 type RadarItems []RadarItem
 
 func (r RadarItems) Len() int {

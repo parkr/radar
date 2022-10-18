@@ -5,10 +5,10 @@ import (
 	"context"
 	"fmt"
 	"sort"
-	"text/template"
 	"time"
 
 	"github.com/google/go-github/v48/github"
+	"github.com/parkr/changelog"
 	"golang.org/x/oauth2"
 )
 
@@ -16,18 +16,6 @@ import (
 var clients = map[string]*github.Client{}
 
 var labels = []string{"radar"}
-
-var bodyTmpl = template.Must(template.New("body").Parse(`
-{{with .OldIssueURL}}[*Previously:*]({{.}}){{end}}
-
-{{range .OldIssues}}- [ ] [{{.GetTitle}}]({{.URL}})
-{{end}}
-{{with .NewIssues}}New:
-
-{{range .}}- [ ] [{{.GetTitle}}]({{.URL}})
-{{end}}{{end}}
-{{with .Mention}}/cc {{.}}{{end}}
-`))
 
 type tmplData struct {
 	OldIssueURL string
@@ -114,9 +102,20 @@ func generateBody(data *tmplData) (string, error) {
 		return "Nothing to do today. Nice work! :sparkles:", nil
 	}
 
-	buf := bytes.NewBufferString("A new day! Here's what you have saved:\n")
-	err := bodyTmpl.Execute(buf, data)
-	return buf.String(), err
+	buf := bytes.NewBufferString("A new day, " + data.Mention + "! Here's what you have saved:\n\n")
+	links := changelog.NewChangelog()
+	previouslyHeader := "Previously:"
+	if data.OldIssueURL != "" {
+		previouslyHeader = "[Previously:](" + data.OldIssueURL + ")"
+	}
+	for _, oldIssue := range data.OldIssues {
+		links.AddLineToVersion(previouslyHeader, &changelog.ChangeLine{Summary: "[ ] " + oldIssue.GetMarkdown()})
+	}
+	for _, newIssue := range data.NewIssues {
+		links.AddLineToVersion("New:", &changelog.ChangeLine{Summary: "[ ] " + newIssue.GetMarkdown()})
+	}
+	fmt.Fprintf(buf, links.String())
+	return buf.String(), nil
 }
 
 func extractGitHubLinks(ctx context.Context, client *github.Client, owner, name string, issue *github.Issue) []RadarItem {
