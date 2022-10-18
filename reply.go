@@ -1,9 +1,10 @@
 package radar
 
 import (
+	"context"
 	"errors"
 
-	mailgun "github.com/mailgun/mailgun-go"
+	mailgun "github.com/mailgun/mailgun-go/v3"
 	"github.com/technoweenie/grohl"
 )
 
@@ -37,7 +38,7 @@ func (svc MailgunService) SendReply(incoming createRequest, body string) error {
 		incoming.fromEmail)
 	message.AddHeader("In-Reply-To", incoming.messageID)
 	message.AddHeader("References", incoming.messageID)
-	resp, id, err := svc.mg.Send(message)
+	resp, id, err := svc.mg.Send(context.Background(), message)
 	grohl.Log(grohl.Data{"id": id})
 	Printf("ID: %s Resp: %s\n", id, resp)
 	return err
