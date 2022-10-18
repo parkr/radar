@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	mailgun "github.com/mailgun/mailgun-go/v3"
+	mailgun "github.com/mailgun/mailgun-go/v4"
 	"github.com/technoweenie/grohl"
 )
 
