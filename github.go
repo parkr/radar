@@ -102,7 +102,7 @@ func getPreviousRadarIssue(ctx context.Context, client *github.Client, owner, na
 		return nil
 	}
 
-	return &result.Issues[0]
+	return result.Issues[0]
 }
 
 func getTitle() string {
@@ -125,8 +125,8 @@ func extractGitHubLinks(ctx context.Context, client *github.Client, owner, name 
 	items = append(items, extractLinkedTodosFromMarkdown(issue.GetBody())...)
 
 	opts := &github.IssueListCommentsOptions{
-		Sort:        "created",
-		Direction:   "asc",
+		Sort:        github.String("created"),
+		Direction:   github.String("asc"),
 		ListOptions: github.ListOptions{PerPage: 100},
 	}
 	for {
