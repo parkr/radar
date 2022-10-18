@@ -10,7 +10,7 @@ import (
 	"syscall"
 	"time"
 
-	mailgun "github.com/mailgun/mailgun-go/v3"
+	mailgun "github.com/mailgun/mailgun-go/v4"
 	"github.com/parkr/radar"
 	"github.com/technoweenie/grohl"
 )
