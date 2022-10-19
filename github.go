@@ -27,6 +27,7 @@ type tmplData struct {
 func GenerateRadarIssue(radarItemsService RadarItemsService, mention string) (*github.Issue, error) {
 	client := radarItemsService.githubClient
 	owner, name := radarItemsService.owner, radarItemsService.repoName
+	var err error
 
 	data := &tmplData{
 		Mention: mention,
@@ -38,7 +39,11 @@ func GenerateRadarIssue(radarItemsService RadarItemsService, mention string) (*g
 	previousIssue := getPreviousRadarIssue(ctx, client, owner, name)
 	if previousIssue != nil {
 		data.OldIssueURL = *previousIssue.HTMLURL
-		data.OldLinks = extractGitHubLinks(ctx, client, owner, name, previousIssue)
+		data.OldLinks, data.NewLinks, err = extractGitHubLinks(ctx, client, owner, name, previousIssue)
+		if err != nil {
+			Printf("Unable to extract GitHub links from %s/%s#%d", owner, name, *previousIssue.Number)
+			return nil, err
+		}
 	}
 
 	sort.Stable(RadarItems(data.NewLinks))
@@ -104,6 +109,9 @@ func generateBody(data *tmplData) (string, error) {
 
 	buf := bytes.NewBufferString("A new day, " + data.Mention + "! Here's what you have saved:\n\n")
 	links := changelog.NewChangelog()
+	for _, newIssue := range data.NewLinks {
+		links.AddLineToVersion("New:", &changelog.ChangeLine{Summary: "[ ] " + newIssue.GetMarkdown()})
+	}
 	previouslyHeader := "*Previously:*"
 	if data.OldIssueURL != "" {
 		previouslyHeader = "[*Previously:*](" + data.OldIssueURL + ")"
@@ -111,18 +119,19 @@ func generateBody(data *tmplData) (string, error) {
 	for _, oldIssue := range data.OldLinks {
 		links.AddLineToVersion(previouslyHeader, &changelog.ChangeLine{Summary: "[ ] " + oldIssue.GetMarkdown()})
 	}
-	for _, newIssue := range data.NewLinks {
-		links.AddLineToVersion("New:", &changelog.ChangeLine{Summary: "[ ] " + newIssue.GetMarkdown()})
-	}
 	fmt.Fprintf(buf, links.String())
 	return buf.String(), nil
 }
 
-func extractGitHubLinks(ctx context.Context, client *github.Client, owner, name string, issue *github.Issue) []RadarItem {
-	var items []RadarItem
+func extractGitHubLinks(ctx context.Context, client *github.Client, owner, name string, issue *github.Issue) ([]RadarItem, []RadarItem, error) {
+	var oldItems []RadarItem
+	var newItems []RadarItem
 
-	extractedItems, _ := extractLinkedTodosFromMarkdown(issue.GetBody())
-	items = append(items, extractedItems...)
+	extractedItems, err := extractLinkedTodosFromMarkdown(issue.GetBody())
+	if err != nil {
+		Printf("Error parsing issue body: %#v", err)
+	}
+	oldItems = append(oldItems, extractedItems...)
 
 	opts := &github.IssueListCommentsOptions{
 		Sort:        github.String("created"),
@@ -133,12 +142,15 @@ func extractGitHubLinks(ctx context.Context, client *github.Client, owner, name 
 		comments, resp, err := client.Issues.ListComments(ctx, owner, name, *issue.Number, opts)
 		if err != nil {
 			Printf("Error fetching comments: %#v", err)
-			return items
+			return oldItems, newItems, err
 		}
 
 		for _, comment := range comments {
-			extractedItems, _ := extractLinkedTodosFromMarkdown(comment.GetBody())
-			items = append(items, extractedItems...)
+			extractedItems, err := extractLinkedTodosFromMarkdown(comment.GetBody())
+			if err != nil {
+				Printf("Error parsing comment body: %#v", err)
+			}
+			newItems = append(newItems, extractedItems...)
 		}
 
 		if resp.NextPage == 0 {
@@ -147,7 +159,7 @@ func extractGitHubLinks(ctx context.Context, client *github.Client, owner, name 
 		opts.ListOptions.Page = resp.NextPage
 	}
 
-	return items
+	return oldItems, newItems, nil
 }
 
 // NewGitHubClient generates a new GitHub client with the given static token source.

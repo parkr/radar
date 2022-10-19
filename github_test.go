@@ -12,15 +12,15 @@ func TestJoinLinksIntoBody(t *testing.T) {
 	newLinks := []RadarItem{{URL: "https://byparker.com"}, {URL: "https://jvns.ca"}}
 	expected := header + `
 
-## [*Previously:*](https://github.com/parkr/radar/issues/1)
-
-  * [ ] [GitHub: Where the world builds software · GitHub](https://github.com)
-  * [ ] [Ben Balter](https://ben.balter.com)
-
 ## New:
 
   * [ ] [Parker Moore | By Parker](https://byparker.com)
   * [ ] [Julia Evans](https://jvns.ca)
+
+## [*Previously:*](https://github.com/parkr/radar/issues/1)
+
+  * [ ] [GitHub: Where the world builds software · GitHub](https://github.com)
+  * [ ] [Ben Balter](https://ben.balter.com)
 `
 
 	body, err := generateBody(&tmplData{

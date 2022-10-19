@@ -57,6 +57,15 @@ A new day! Here's what you have saved:
 	assert.Len(t, items, 30, "expecting 30 radar items")
 }
 
+func Test_extractLinkedTodosFromMarkdown_newLinkCommentBody(t *testing.T) {
+	body := "- [ ] [changelog package - github.com/parkr/changelog@v1.1.0](https://pkg.go.dev/github.com/parkr/changelog@v1.1.0)"
+
+	items, err := extractLinkedTodosFromMarkdown(body)
+
+	assert.NoError(t, err)
+	assert.Equal(t, []RadarItem{{Title: "changelog package - github.com/parkr/changelog@v1.1.0", URL: "https://pkg.go.dev/github.com/parkr/changelog@v1.1.0"}}, items)
+}
+
 func Test_extractLinkedTodosFromMarkdown_changelogFormat(t *testing.T) {
 	body := `
 A new day, @parkr! Here's what you have saved:
