@@ -19,8 +19,8 @@ var labels = []string{"radar"}
 
 type tmplData struct {
 	OldIssueURL string
-	NewIssues   []RadarItem
-	OldIssues   []RadarItem
+	NewLinks    []RadarItem
+	OldLinks    []RadarItem
 	Mention     string
 }
 
@@ -38,11 +38,11 @@ func GenerateRadarIssue(radarItemsService RadarItemsService, mention string) (*g
 	previousIssue := getPreviousRadarIssue(ctx, client, owner, name)
 	if previousIssue != nil {
 		data.OldIssueURL = *previousIssue.HTMLURL
-		data.OldIssues = extractGitHubLinks(ctx, client, owner, name, previousIssue)
+		data.OldLinks = extractGitHubLinks(ctx, client, owner, name, previousIssue)
 	}
 
-	sort.Stable(RadarItems(data.NewIssues))
-	sort.Stable(RadarItems(data.OldIssues))
+	sort.Stable(RadarItems(data.NewLinks))
+	sort.Stable(RadarItems(data.OldLinks))
 
 	body, err := generateBody(data)
 	if err != nil {
@@ -98,20 +98,20 @@ func getTitle() string {
 }
 
 func generateBody(data *tmplData) (string, error) {
-	if len(data.NewIssues) == 0 && len(data.OldIssues) == 0 {
+	if len(data.NewLinks) == 0 && len(data.OldLinks) == 0 {
 		return "Nothing to do today. Nice work! :sparkles:", nil
 	}
 
 	buf := bytes.NewBufferString("A new day, " + data.Mention + "! Here's what you have saved:\n\n")
 	links := changelog.NewChangelog()
-	previouslyHeader := "Previously:"
+	previouslyHeader := "*Previously:*"
 	if data.OldIssueURL != "" {
-		previouslyHeader = "[Previously:](" + data.OldIssueURL + ")"
+		previouslyHeader = "[*Previously:*](" + data.OldIssueURL + ")"
 	}
-	for _, oldIssue := range data.OldIssues {
+	for _, oldIssue := range data.OldLinks {
 		links.AddLineToVersion(previouslyHeader, &changelog.ChangeLine{Summary: "[ ] " + oldIssue.GetMarkdown()})
 	}
-	for _, newIssue := range data.NewIssues {
+	for _, newIssue := range data.NewLinks {
 		links.AddLineToVersion("New:", &changelog.ChangeLine{Summary: "[ ] " + newIssue.GetMarkdown()})
 	}
 	fmt.Fprintf(buf, links.String())
@@ -121,7 +121,8 @@ func generateBody(data *tmplData) (string, error) {
 func extractGitHubLinks(ctx context.Context, client *github.Client, owner, name string, issue *github.Issue) []RadarItem {
 	var items []RadarItem
 
-	items = append(items, extractLinkedTodosFromMarkdown(issue.GetBody())...)
+	extractedItems, _ := extractLinkedTodosFromMarkdown(issue.GetBody())
+	items = append(items, extractedItems...)
 
 	opts := &github.IssueListCommentsOptions{
 		Sort:        github.String("created"),
@@ -136,7 +137,8 @@ func extractGitHubLinks(ctx context.Context, client *github.Client, owner, name 
 		}
 
 		for _, comment := range comments {
-			items = append(items, extractLinkedTodosFromMarkdown(comment.GetBody())...)
+			extractedItems, _ := extractLinkedTodosFromMarkdown(comment.GetBody())
+			items = append(items, extractedItems...)
 		}
 
 		if resp.NextPage == 0 {
