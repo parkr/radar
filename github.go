@@ -5,10 +5,10 @@ import (
 	"context"
 	"fmt"
 	"sort"
-	"text/template"
 	"time"
 
 	"github.com/google/go-github/v48/github"
+	"github.com/parkr/changelog"
 	"golang.org/x/oauth2"
 )
 
@@ -17,28 +17,17 @@ var clients = map[string]*github.Client{}
 
 var labels = []string{"radar"}
 
-var bodyTmpl = template.Must(template.New("body").Parse(`
-{{with .OldIssueURL}}[*Previously:*]({{.}}){{end}}
-
-{{range .OldIssues}}- [ ] [{{.GetTitle}}]({{.URL}})
-{{end}}
-{{with .NewIssues}}New:
-
-{{range .}}- [ ] [{{.GetTitle}}]({{.URL}})
-{{end}}{{end}}
-{{with .Mention}}/cc {{.}}{{end}}
-`))
-
 type tmplData struct {
 	OldIssueURL string
-	NewIssues   []RadarItem
-	OldIssues   []RadarItem
+	NewLinks    []RadarItem
+	OldLinks    []RadarItem
 	Mention     string
 }
 
 func GenerateRadarIssue(radarItemsService RadarItemsService, mention string) (*github.Issue, error) {
 	client := radarItemsService.githubClient
 	owner, name := radarItemsService.owner, radarItemsService.repoName
+	var err error
 
 	data := &tmplData{
 		Mention: mention,
@@ -50,11 +39,15 @@ func GenerateRadarIssue(radarItemsService RadarItemsService, mention string) (*g
 	previousIssue := getPreviousRadarIssue(ctx, client, owner, name)
 	if previousIssue != nil {
 		data.OldIssueURL = *previousIssue.HTMLURL
-		data.OldIssues = extractGitHubLinks(ctx, client, owner, name, previousIssue)
+		data.OldLinks, data.NewLinks, err = extractGitHubLinks(ctx, client, owner, name, previousIssue)
+		if err != nil {
+			Printf("Unable to extract GitHub links from %s/%s#%d", owner, name, *previousIssue.Number)
+			return nil, err
+		}
 	}
 
-	sort.Stable(RadarItems(data.NewIssues))
-	sort.Stable(RadarItems(data.OldIssues))
+	sort.Stable(RadarItems(data.NewLinks))
+	sort.Stable(RadarItems(data.OldLinks))
 
 	body, err := generateBody(data)
 	if err != nil {
@@ -110,19 +103,35 @@ func getTitle() string {
 }
 
 func generateBody(data *tmplData) (string, error) {
-	if len(data.NewIssues) == 0 && len(data.OldIssues) == 0 {
+	if len(data.NewLinks) == 0 && len(data.OldLinks) == 0 {
 		return "Nothing to do today. Nice work! :sparkles:", nil
 	}
 
-	buf := bytes.NewBufferString("A new day! Here's what you have saved:\n")
-	err := bodyTmpl.Execute(buf, data)
-	return buf.String(), err
+	buf := bytes.NewBufferString("A new day, " + data.Mention + "! Here's what you have saved:\n\n")
+	links := changelog.NewChangelog()
+	for _, newIssue := range data.NewLinks {
+		links.AddLineToVersion("New:", &changelog.ChangeLine{Summary: "[ ] " + newIssue.GetMarkdown()})
+	}
+	previouslyHeader := "*Previously:*"
+	if data.OldIssueURL != "" {
+		previouslyHeader = "[*Previously:*](" + data.OldIssueURL + ")"
+	}
+	for _, oldIssue := range data.OldLinks {
+		links.AddLineToVersion(previouslyHeader, &changelog.ChangeLine{Summary: "[ ] " + oldIssue.GetMarkdown()})
+	}
+	fmt.Fprintf(buf, links.String())
+	return buf.String(), nil
 }
 
-func extractGitHubLinks(ctx context.Context, client *github.Client, owner, name string, issue *github.Issue) []RadarItem {
-	var items []RadarItem
+func extractGitHubLinks(ctx context.Context, client *github.Client, owner, name string, issue *github.Issue) ([]RadarItem, []RadarItem, error) {
+	var oldItems []RadarItem
+	var newItems []RadarItem
 
-	items = append(items, extractLinkedTodosFromMarkdown(issue.GetBody())...)
+	extractedItems, err := extractLinkedTodosFromMarkdown(issue.GetBody())
+	if err != nil {
+		Printf("Error parsing issue body: %#v", err)
+	}
+	oldItems = append(oldItems, extractedItems...)
 
 	opts := &github.IssueListCommentsOptions{
 		Sort:        github.String("created"),
@@ -133,11 +142,15 @@ func extractGitHubLinks(ctx context.Context, client *github.Client, owner, name 
 		comments, resp, err := client.Issues.ListComments(ctx, owner, name, *issue.Number, opts)
 		if err != nil {
 			Printf("Error fetching comments: %#v", err)
-			return items
+			return oldItems, newItems, err
 		}
 
 		for _, comment := range comments {
-			items = append(items, extractLinkedTodosFromMarkdown(comment.GetBody())...)
+			extractedItems, err := extractLinkedTodosFromMarkdown(comment.GetBody())
+			if err != nil {
+				Printf("Error parsing comment body: %#v", err)
+			}
+			newItems = append(newItems, extractedItems...)
 		}
 
 		if resp.NextPage == 0 {
@@ -146,7 +159,7 @@ func extractGitHubLinks(ctx context.Context, client *github.Client, owner, name 
 		opts.ListOptions.Page = resp.NextPage
 	}
 
-	return items
+	return oldItems, newItems, nil
 }
 
 // NewGitHubClient generates a new GitHub client with the given static token source.

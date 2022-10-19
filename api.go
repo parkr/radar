@@ -62,13 +62,13 @@ func (h APIHandler) CreateRadarItem(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h APIHandler) ListRadarItems(w http.ResponseWriter, r *http.Request) {
-	radarItems, err := h.RadarItems.List(r.Context())
+	oldRadarItems, newRadarItems, err := h.RadarItems.List(r.Context())
 	if err != nil {
 		h.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	err = json.NewEncoder(w).Encode(radarItems)
+	err = json.NewEncoder(w).Encode(map[string]interface{}{"OldItems": oldRadarItems, "NewRadarItems": newRadarItems})
 	if err != nil {
 		h.Error(w, err.Error(), http.StatusInternalServerError)
 		return

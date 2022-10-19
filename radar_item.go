@@ -33,6 +33,10 @@ func (r *RadarItem) GetHostname() string {
 	return r.parsedURL.Hostname()
 }
 
+func (r *RadarItem) GetMarkdown() string {
+	return "[" + r.GetTitle() + "](" + r.URL + ")"
+}
+
 type RadarItems []RadarItem
 
 func (r RadarItems) Len() int {
@@ -81,12 +85,12 @@ func (rs RadarItemsService) GetGitHubIssue(ctx context.Context) (*github.Issue, 
 }
 
 // List returns a list of parsed radar items present on the list.
-func (rs RadarItemsService) List(ctx context.Context) ([]RadarItem, error) {
+func (rs RadarItemsService) List(ctx context.Context) ([]RadarItem, []RadarItem, error) {
 	issue, err := rs.GetGitHubIssue(ctx)
 	if err != nil {
-		return nil, errors.WithMessage(err, "error fetching open issue")
+		return nil, nil, errors.WithMessage(err, "error fetching open issue")
 	}
-	return extractGitHubLinks(ctx, rs.githubClient, rs.owner, rs.repoName, issue), nil
+	return extractGitHubLinks(ctx, rs.githubClient, rs.owner, rs.repoName, issue)
 }
 
 // Create adds a RadarItem to the GitHub issue.

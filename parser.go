@@ -12,10 +12,11 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/parkr/changelog"
 )
 
 var titleExtractorRegexp = regexp.MustCompile("(?i)<title>(.+)</title>")
-var markdownLinkExtractorRegexp = regexp.MustCompile("-\\s+\\[ \\]\\s+\\[(.+)\\]\\((.+)\\)")
 
 func (r RadarItem) GetTitle() string {
 	if r.Title == "" {
@@ -131,15 +132,34 @@ func isBinaryResource(resp *http.Response, u *url.URL) bool {
 	return !ok
 }
 
-func extractLinkedTodosFromMarkdown(body string) []RadarItem {
+func extractLinkedTodosFromMarkdown(body string) ([]RadarItem, error) {
 	var items []RadarItem
-	for _, match := range markdownLinkExtractorRegexp.FindAllStringSubmatch(body, -1) {
-		if len(match) < 3 {
-			continue
-		}
-		items = append(items, RadarItem{Title: match[1], URL: match[2]})
+	chlog, err := changelog.NewChangelogFromReader(strings.NewReader(body))
+	if err != nil {
+		return items, err
 	}
-	return items
+	for _, version := range chlog.Versions {
+		for _, line := range version.History {
+			// Checked off, ignore.
+			if strings.HasPrefix(line.Summary, "[x]") || strings.HasPrefix(line.Summary, "[X]") {
+				continue
+			}
+			// Not checked off, parse and include.
+			title, url := parseMarkdownLink(line.Summary[len("[ ] "):])
+			items = append(items, RadarItem{Title: title, URL: url})
+		}
+	}
+	return items, nil
+}
+
+func parseMarkdownLink(link string) (title string, url string) {
+	closingParenIdx := strings.LastIndex(link, ")")
+	boundaryIdx := strings.LastIndex(link, "](")
+	openingIdx := strings.Index(link, "[")
+	if closingParenIdx < 0 || boundaryIdx < 0 || openingIdx < 0 {
+		return "", ""
+	}
+	return link[openingIdx+1 : boundaryIdx], link[boundaryIdx+2 : closingParenIdx]
 }
 
 var privateIPBlocks []*net.IPNet
