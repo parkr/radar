@@ -7,7 +7,7 @@ require (
 	github.com/facebookgo/subset v0.0.0-20200203212716-c811ad88dec4 // indirect
 	github.com/google/go-github/v48 v48.2.0
 	github.com/google/uuid v1.3.0
-	github.com/mailgun/mailgun-go/v4 v4.8.1
+	github.com/mailgun/mailgun-go/v4 v4.8.2
 	github.com/parkr/changelog v1.3.0
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.1
