@@ -13,8 +13,7 @@ require (
 	github.com/stretchr/testify v1.8.1
 	github.com/technoweenie/grohl v0.0.0-20140924204239-f4613feb389e
 	golang.org/x/crypto v0.0.0-20221012134737-56aed061732a // indirect
-	golang.org/x/net v0.0.0-20221017152216-f25eb7ecb193 // indirect
-	golang.org/x/oauth2 v0.0.0-20221014153046-6fdb5e3db783
+	golang.org/x/oauth2 v0.5.0
 	google.golang.org/protobuf v1.28.1 // indirect
 	mvdan.cc/xurls/v2 v2.4.0
 )
