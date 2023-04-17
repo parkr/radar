@@ -7,6 +7,7 @@ require (
 	github.com/facebookgo/subset v0.0.0-20200203212716-c811ad88dec4 // indirect
 	github.com/google/go-github/v48 v48.2.0
 	github.com/google/uuid v1.3.0
+	github.com/kr/pretty v0.1.0 // indirect
 	github.com/mailgun/mailgun-go/v4 v4.8.2
 	github.com/parkr/changelog v1.3.0
 	github.com/pkg/errors v0.9.1
@@ -15,5 +16,6 @@ require (
 	golang.org/x/crypto v0.0.0-20221012134737-56aed061732a // indirect
 	golang.org/x/oauth2 v0.7.0
 	google.golang.org/protobuf v1.28.1 // indirect
-	mvdan.cc/xurls/v2 v2.4.0
+	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
+	mvdan.cc/xurls/v2 v2.5.0
 )
