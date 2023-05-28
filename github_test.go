@@ -17,10 +17,12 @@ func TestJoinLinksIntoBody(t *testing.T) {
   * [ ] [Parker Moore | By Parker](https://byparker.com)
   * [ ] [Julia Evans](https://jvns.ca)
 
-## [*Previously:*](https://github.com/parkr/radar/issues/1)
+## *Previously:*
 
   * [ ] [GitHub: Let’s build from here · GitHub](https://github.com)
   * [ ] [Ben Balter](https://ben.balter.com)
+
+*Previously:* https://github.com/parkr/radar/issues/1
 `
 
 	body, err := generateBody(&tmplData{

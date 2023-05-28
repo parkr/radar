@@ -70,21 +70,23 @@ func Test_extractLinkedTodosFromMarkdown_changelogFormat(t *testing.T) {
 	body := `
 A new day, @parkr! Here's what you have saved:
 
-## [*Previously:*](https://github.com/parkr/radar/issues/1)
-
-  * [ ] [GitHub: Where the world builds software · GitHub](https://github.com)
-  * [ ] [Ben Balter](https://ben.balter.com)
-
 ## New:
 
   * [ ] [Parker Moore | By Parker](https://byparker.com)
   * [ ] [Julia Evans](https://jvns.ca)
+
+## *Previously:
+
+  * [ ] [GitHub: Where the world builds software · GitHub](https://github.com)
+  * [ ] [Ben Balter](https://ben.balter.com)
+
+Previously: https://github.com/parkr/radar/issues/1
 `
 	expected := []RadarItem{
-		{Title: "GitHub: Where the world builds software · GitHub", URL: "https://github.com"},
-		{Title: "Ben Balter", URL: "https://ben.balter.com"},
 		{Title: "Parker Moore | By Parker", URL: "https://byparker.com"},
 		{Title: "Julia Evans", URL: "https://jvns.ca"},
+		{Title: "GitHub: Where the world builds software · GitHub", URL: "https://github.com"},
+		{Title: "Ben Balter", URL: "https://ben.balter.com"},
 	}
 
 	items, err := extractLinkedTodosFromMarkdown(body)
@@ -118,6 +120,11 @@ func Test_parseMarkdownLink(t *testing.T) {
 			input: `[Life is too short for dated CLI tools (Twitter thread)](https://mobile.twitter.com/amilajack/status/1479328649820000256)`,
 			title: "Life is too short for dated CLI tools (Twitter thread)",
 			url:   "https://mobile.twitter.com/amilajack/status/1479328649820000256",
+		},
+		{
+			input: `[F) Sector 6 (NOC) - Metroid Fusion Guide - IGN](https://www.ign.com/wikis/metroid-fusion/F)_Sector_6_(NOC))`,
+			title: "F) Sector 6 (NOC) - Metroid Fusion Guide - IGN",
+			url:   "https://www.ign.com/wikis/metroid-fusion/F)_Sector_6_(NOC)",
 		},
 	}
 	for _, testcase := range testcases {

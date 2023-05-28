@@ -113,13 +113,13 @@ func generateBody(data *tmplData) (string, error) {
 		links.AddLineToVersion("New:", &changelog.ChangeLine{Summary: "[ ] " + newIssue.GetMarkdown()})
 	}
 	previouslyHeader := "*Previously:*"
-	if data.OldIssueURL != "" {
-		previouslyHeader = "[*Previously:*](" + data.OldIssueURL + ")"
-	}
 	for _, oldIssue := range data.OldLinks {
 		links.AddLineToVersion(previouslyHeader, &changelog.ChangeLine{Summary: "[ ] " + oldIssue.GetMarkdown()})
 	}
 	fmt.Fprintf(buf, links.String())
+	if data.OldIssueURL != "" {
+		fmt.Fprintf(buf, "\n*Previously:* %s\n", data.OldIssueURL)
+	}
 	return buf.String(), nil
 }
 
