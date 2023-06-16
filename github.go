@@ -116,7 +116,7 @@ func generateBody(data *tmplData) (string, error) {
 	for _, oldIssue := range data.OldLinks {
 		links.AddLineToVersion(previouslyHeader, &changelog.ChangeLine{Summary: "[ ] " + oldIssue.GetMarkdown()})
 	}
-	fmt.Fprintf(buf, links.String())
+	fmt.Fprint(buf, links.String())
 	if data.OldIssueURL != "" {
 		fmt.Fprintf(buf, "\n*Previously:* %s\n", data.OldIssueURL)
 	}

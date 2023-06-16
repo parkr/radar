@@ -146,7 +146,11 @@ func extractLinkedTodosFromMarkdown(body string) ([]RadarItem, error) {
 			}
 			// Not checked off, parse and include.
 			title, url := parseMarkdownLink(line.Summary[len("[ ] "):])
-			items = append(items, RadarItem{Title: title, URL: url})
+			if url != "" {
+				items = append(items, RadarItem{Title: title, URL: url})
+			} else {
+				Printf("unable to parse link: %s", line.Summary[len("[ ] "):])
+			}
 		}
 	}
 	return items, nil
