@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/google/go-github/v53 v53.2.0
 	github.com/google/uuid v1.3.0
-	github.com/mailgun/mailgun-go/v4 v4.9.1
+	github.com/mailgun/mailgun-go/v4 v4.9.2
 	github.com/parkr/changelog v1.4.0
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.4
@@ -20,9 +20,9 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/facebookgo/ensure v0.0.0-20200202191622-63f1cf65ac4c // indirect
 	github.com/facebookgo/subset v0.0.0-20200203212716-c811ad88dec4 // indirect
+	github.com/go-chi/chi/v5 v5.0.8 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
-	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
