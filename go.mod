@@ -10,7 +10,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.9.0
 	github.com/technoweenie/grohl v0.0.0-20140924204239-f4613feb389e
-	golang.org/x/oauth2 v0.19.0
+	golang.org/x/oauth2 v0.20.0
 	mvdan.cc/xurls/v2 v2.5.0
 )
 
