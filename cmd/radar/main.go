@@ -120,10 +120,10 @@ func main() {
 		go feedHandler.Start()
 	} else {
 		go func() {
-			for _ := range radarGeneratedChan {
+			for _ = range radarGeneratedChan {
 				// do nothing
 			}
-		}
+		}()
 	}
 
 	go emailHandler.Start()
