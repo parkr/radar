@@ -22,6 +22,7 @@ type APIHandler struct {
 	// Enable debug logging.
 	Debug bool
 
+	// Channel to signal that the radar state has changed.
 	radarGeneratedChan chan bool
 }
 

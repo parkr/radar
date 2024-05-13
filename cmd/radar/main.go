@@ -85,7 +85,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	radarGeneratedChan := make(chan bool, 1)
+	radarGeneratedChan := make(chan bool, 100)
 	radarRepoPieces := strings.Split(radarRepo, "/")
 	radarItemsService := radar.NewRadarItemsService(radar.NewGitHubClient(githubToken), radarRepoPieces[0], radarRepoPieces[1])
 
@@ -118,6 +118,12 @@ func main() {
 		feedHandler := radar.NewFeedHandler(radarItemsService, *feedConfig, radarGeneratedChan)
 		mux.Handle("/feed.atom", feedHandler)
 		go feedHandler.Start()
+	} else {
+		go func() {
+			for _ := range radarGeneratedChan {
+				// do nothing
+			}
+		}
 	}
 
 	go emailHandler.Start()
