@@ -37,6 +37,10 @@ func (r *RadarItem) GetMarkdown() string {
 	return "[" + r.GetTitle() + "](" + r.URL + ")"
 }
 
+func (r *RadarItem) GetFormatted() string {
+	return r.Title + " (" + r.URL + ")"
+}
+
 type RadarItems []RadarItem
 
 func (r RadarItems) Len() int {

@@ -17,13 +17,14 @@ type RadarItemsStorageService interface {
 	Shutdown(ctx context.Context)
 }
 
-func NewEmailHandler(radarItemsService RadarItemsStorageService, mailgunService MailgunService, allowedSenders []string, debug bool) EmailHandler {
+func NewEmailHandler(radarItemsService RadarItemsStorageService, mailgunService MailgunService, allowedSenders []string, debug bool, RadarCreatedChan chan bool) EmailHandler {
 	return EmailHandler{
-		AllowedSenders: allowedSenders,
-		Debug:          debug,
-		RadarItems:     radarItemsService,
-		Mailgun:        mailgunService,
-		CreateQueue:    make(chan createRequest, 10),
+		AllowedSenders:   allowedSenders,
+		Debug:            debug,
+		RadarItems:       radarItemsService,
+		Mailgun:          mailgunService,
+		CreateQueue:      make(chan createRequest, 10),
+		RadarCreatedChan: RadarCreatedChan,
 	}
 }
 
@@ -42,6 +43,8 @@ type EmailHandler struct {
 
 	// The queue
 	CreateQueue chan createRequest
+
+	RadarCreatedChan chan bool
 }
 
 type createRequest struct {
@@ -64,6 +67,7 @@ func (h EmailHandler) Start() {
 		} else {
 			h.Mailgun.SendReply(req, "Added "+req.url+" to the radar.")
 			Printf("saved url=%s to radar", req.url)
+			h.RadarCreatedChan <- true
 		}
 		cancel()
 	}

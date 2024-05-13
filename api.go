@@ -21,6 +21,8 @@ type APIHandler struct {
 
 	// Enable debug logging.
 	Debug bool
+
+	radarGeneratedChan chan bool
 }
 
 func (h APIHandler) Error(w http.ResponseWriter, message string, code int) {
@@ -31,6 +33,7 @@ func (h APIHandler) Error(w http.ResponseWriter, message string, code int) {
 func (h APIHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost && r.URL.Path == apiPrefix {
 		h.CreateRadarItem(w, r)
+		h.radarGeneratedChan <- true
 		return
 	}
 
