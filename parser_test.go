@@ -95,6 +95,16 @@ Previously: https://github.com/parkr/radar/issues/1
 	assert.Equal(t, expected, items)
 }
 
+func Test_extractLinkedTodosFromMarkdown_worksOnBothBodyStyles(t *testing.T) {
+	items, err := extractLinkedTodosFromMarkdown(testData.newStyleBody)
+	assert.NoError(t, err)
+	assert.Equal(t, testData.expectedOldItems, items)
+
+	items, err = extractLinkedTodosFromMarkdown(testData.oldStyleBody)
+	assert.NoError(t, err)
+	assert.Equal(t, testData.expectedOldItems, items)
+}
+
 func Test_parseMarkdownLink(t *testing.T) {
 	testcases := []struct {
 		input string
