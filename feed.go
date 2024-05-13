@@ -11,7 +11,7 @@ import (
 )
 
 type FeedConfig struct {
-	Titile      string
+	Title       string
 	URL         string
 	Description string
 	AuthorName  string
@@ -31,7 +31,7 @@ func NewFeedHandler(radarItemsService RadarItemsService, config FeedConfig, rada
 	return &FeedHandler{
 		radarItems: radarItemsService,
 		feed: &feeds.Feed{
-			Title:       config.Titile,
+			Title:       config.Title,
 			Link:        &feeds.Link{Href: config.URL},
 			Description: config.Description,
 			Author:      &feeds.Author{Name: config.AuthorName},
@@ -62,7 +62,7 @@ func (h FeedHandler) ResetCache() {
 	h.cache.Reset()
 }
 
-func (h FeedHandler) populateCache(ctx context.Context) error {
+func (h *FeedHandler) populateCache(ctx context.Context) error {
 	h.ResetCache()
 
 	oldItems, newItems, err := h.radarItems.List(ctx)
