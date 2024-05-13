@@ -21,6 +21,7 @@ type FeedConfig struct {
 type FeedHandler struct {
 	radarItems         RadarItemsService
 	feed               *feeds.Feed
+	apiToken           string
 	cache              bytes.Buffer
 	radarGeneratedChan chan bool
 }
@@ -37,6 +38,7 @@ func NewFeedHandler(radarItemsService RadarItemsService, config FeedConfig, rada
 			Created:     time.Now(),
 		},
 		radarGeneratedChan: radarGeneratedChan,
+		apiToken:           config.APIKey,
 	}
 }
 
@@ -82,6 +84,11 @@ func (h FeedHandler) populateCache(ctx context.Context) error {
 }
 
 func (h FeedHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if r.FormValue("tok") != h.apiToken {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	if err := h.populateCache(r.Context()); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
