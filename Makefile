@@ -17,7 +17,7 @@ server: build
 docker-build:
 	docker buildx build \
         --platform $(PLATFORMS) \
-        --local \
+        --load \
         -t $(DOCKER_IMAGE) \
 		.
 
