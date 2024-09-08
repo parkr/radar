@@ -28,9 +28,9 @@ docker-test: docker-build
 
 docker-release: docker-buildx-info
 	docker buildx build \
-        --platform $(PLATFORMS) \
-        --push \
-        -t $(DOCKER_IMAGE) \
+		--platform $(PLATFORMS) \
+		--push \
+		-t $(DOCKER_IMAGE) \
 		.
 
 docker-buildx-info:
