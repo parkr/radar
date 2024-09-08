@@ -15,11 +15,7 @@ server: build
 	$(shell radar -http="localhost:8291" -debug)
 
 docker-build:
-	docker buildx build \
-        --platform $(PLATFORMS) \
-        --load \
-        -t $(DOCKER_IMAGE) \
-		.
+	docker build -t $(DOCKER_IMAGE) .
 
 docker-test: docker-build
 	docker run --rm \
