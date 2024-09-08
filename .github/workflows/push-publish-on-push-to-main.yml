@@ -22,4 +22,4 @@ jobs:
     - name: Build & publish
       uses: parkr/actions/docker-make@main
       with:
-        args: docker-release -e DOCKER_TAG=${{ github.sha }}
+        args: docker-buildx-create docker-release -e DOCKER_TAG=${{ github.sha }}
