@@ -15,6 +15,7 @@ import (
 	mailgun "github.com/mailgun/mailgun-go/v4"
 	"github.com/parkr/radar"
 	"github.com/technoweenie/grohl"
+	"gosrc.io/mqtt"
 )
 
 // getMailgunService creates a Mailgun service from the environment variables.
@@ -71,6 +72,10 @@ func main() {
 	flag.StringVar(&hourToGenerateRadar, "hour", "03", "Hour of day (01-23) to generate the radar message.")
 	var feedConfigPath string
 	flag.StringVar(&feedConfigPath, "feedConfig", "", "Path to the feed config.")
+	var mqttConnStr string
+	flag.StringVar(&mqttConnStr, "mqtt", mqtt.DefaultMQTTServer, "MQTT connection string.")
+	var mqttTopic string
+	flag.StringVar(&mqttTopic, "mqttTopic", "radar", "MQTT topic to listen on.")
 	flag.Parse()
 
 	grohl.SetLogger(grohl.NewIoLogger(os.Stderr))
@@ -128,6 +133,16 @@ func main() {
 
 	go emailHandler.Start()
 
+	mqttHandler := radar.NewEmailFromMqttHandler(
+		radarItemsService, // RadarItemsService
+		mqttConnStr,
+		mqttTopic,
+		strings.Split(os.Getenv("RADAR_ALLOWED_SENDERS"), ","), // Allowed senders (email addresses)
+		debug,              // Whether in debug mode
+		radarGeneratedChan, // Act on radar generation
+	)
+	go mqttHandler.Start()
+
 	// Start the radarGenerator.
 	radarC := make(chan os.Signal, 1)
 	go radarGenerator(radarItemsService, radarC, hourToGenerateRadar, radarGeneratedChan)
@@ -159,6 +174,7 @@ func main() {
 		radar.Println("Shutting down radar items service...")
 		radarItemsService.Shutdown(ctx)
 		emailHandler.Shutdown(ctx)
+		mqttHandler.Shutdown(ctx)
 		radar.Println("Telling server to shutdown...")
 		_ = server.Shutdown(ctx)
 		radar.Println("Done with graceful shutdown.")
