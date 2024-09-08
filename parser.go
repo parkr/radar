@@ -3,7 +3,7 @@ package radar
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net"
 	"net/http"
 	"net/url"
@@ -26,19 +26,27 @@ func (r RadarItem) GetTitle() string {
 }
 
 func titleForWebpage(urlString string) string {
-	u, err := url.Parse(urlString)
+	inputURL, err := url.Parse(urlString)
 	if err != nil {
 		return urlString
 	}
 
-	if u.Hostname() == "github.com" && u.Path != "" {
-		if title := titleForGitHubReference(u); title != "" {
+	if inputURL.Hostname() == "github.com" && inputURL.Path != "" {
+		if title := titleForGitHubReference(inputURL); title != "" {
 			return title
 		}
 	}
 
-	if isPrivateHost(u.Hostname()) {
-		return "A private page on " + u.Hostname()
+	if isPrivateHost(inputURL.Hostname()) {
+		return "A private page on " + inputURL.Hostname()
+	}
+
+	u := &url.URL{
+		Scheme:   inputURL.Scheme,
+		Host:     inputURL.Host,
+		Path:     inputURL.Path,
+		RawQuery: inputURL.RawQuery,
+		Fragment: inputURL.Fragment,
 	}
 
 	resp, err := http.Get(u.String())
@@ -50,7 +58,7 @@ func titleForWebpage(urlString string) string {
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "A page on " + u.Hostname()
 	}
