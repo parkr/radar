@@ -5,13 +5,18 @@ go 1.20
 require (
 	github.com/google/go-github/v53 v53.2.0
 	github.com/google/uuid v1.6.0
-	github.com/mailgun/mailgun-go/v4 v4.15.2
+	github.com/mailgun/mailgun-go/v4 v4.16.0
 	github.com/parkr/changelog v1.5.0
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.9.0
 	github.com/technoweenie/grohl v0.0.0-20140924204239-f4613feb389e
 	golang.org/x/oauth2 v0.23.0
 	mvdan.cc/xurls/v2 v2.5.0
+)
+
+require (
+	github.com/mailgun/errors v0.3.0 // indirect
+	github.com/sirupsen/logrus v1.9.0 // indirect
 )
 
 require (
