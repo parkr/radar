@@ -85,7 +85,7 @@ func newTestGitHubClientAndServer(t *testing.T) (*github.Client, *httptest.Serve
 
 func TestJoinLinksIntoBody(t *testing.T) {
 	header := "A new day, @parkr! Here's what you have saved:"
-	oldLinks := []RadarItem{{URL: "https://github.com"}, {URL: "https://ben.balter.com", Title: "Ben Balter"}}
+	oldLinks := []RadarItem{{URL: "https://google.com"}, {URL: "https://ben.balter.com", Title: "Ben Balter"}}
 	newLinks := []RadarItem{{URL: "https://byparker.com"}, {URL: "https://jvns.ca"}}
 	expected := header + `
 
@@ -96,7 +96,7 @@ func TestJoinLinksIntoBody(t *testing.T) {
 
 ## *Previously:*
 
-  * [ ] [GitHub: Let’s build from here · GitHub](https://github.com)
+  * [ ] [Google](https://google.com)
   * [ ] [Ben Balter](https://ben.balter.com)
 
 *Previously:* https://github.com/parkr/radar/issues/1
