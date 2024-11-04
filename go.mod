@@ -7,7 +7,7 @@ toolchain go1.23.1
 require (
 	github.com/google/go-github/v53 v53.2.0
 	github.com/google/uuid v1.6.0
-	github.com/mailgun/mailgun-go/v4 v4.17.0
+	github.com/mailgun/mailgun-go/v4 v4.18.1
 	github.com/parkr/changelog v1.5.0
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.9.0
@@ -25,8 +25,6 @@ require (
 	github.com/ProtonMail/go-crypto v0.0.0-20230217124315-7d5c6f04bbb8 // indirect
 	github.com/cloudflare/circl v1.3.7 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/facebookgo/ensure v0.0.0-20200202191622-63f1cf65ac4c // indirect
-	github.com/facebookgo/subset v0.0.0-20200203212716-c811ad88dec4 // indirect
 	github.com/go-chi/chi/v5 v5.0.8 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/gorilla/feeds v1.2.0
