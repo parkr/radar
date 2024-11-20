@@ -16,6 +16,8 @@ require (
 	mvdan.cc/xurls/v2 v2.5.0
 )
 
+require gosrc.io/mqtt v0.0.0-20190226142036-a2ebb16fa266 // indirect
+
 require (
 	github.com/mailgun/errors v0.3.0 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
