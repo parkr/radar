@@ -10,7 +10,7 @@ require (
 	github.com/mailgun/mailgun-go/v4 v4.18.5
 	github.com/parkr/changelog v1.5.0
 	github.com/pkg/errors v0.9.1
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	github.com/technoweenie/grohl v0.0.0-20140924204239-f4613feb389e
 	golang.org/x/oauth2 v0.24.0
 	mvdan.cc/xurls/v2 v2.5.0
