@@ -1,7 +1,6 @@
 module github.com/parkr/radar
 
 go 1.22
-
 toolchain go1.23.1
 
 require (
@@ -13,7 +12,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/technoweenie/grohl v0.0.0-20140924204239-f4613feb389e
 	golang.org/x/oauth2 v0.24.0
-	mvdan.cc/xurls/v2 v2.5.0
+	mvdan.cc/xurls/v2 v2.6.0
 )
 
 require github.com/mailgun/errors v0.4.0 // indirect
