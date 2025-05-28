@@ -4,7 +4,11 @@ PLATFORMS:=linux/amd64,linux/arm64
 
 all: build test
 
-build:
+bin/%:
+	$(eval BINARY_NAME := $(patsubst bin/%,%,$@))
+	go build -o bin/$(BINARY_NAME) github.com/parkr/radar/cmd/$(BINARY_NAME)
+
+build: bin/radar bin/radar-healthcheck bin/radar-poster
 	go install github.com/parkr/radar/...
 
 test:
