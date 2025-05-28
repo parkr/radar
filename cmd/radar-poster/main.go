@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
+	"time"
 
 	"github.com/parkr/radar"
 	"github.com/technoweenie/grohl"
@@ -22,7 +24,7 @@ var createHtmlTemplate = `
 	<h1>Create Radar Item</h1>
 	<form action="/create" method="post">
 		<label for="title">Title:</label>
-		<input type="text" id="title" name="title" required>
+		<input type="text" id="title" name="title">
 		<label for="url">URL:</label>
 		<input type="url" id="url" name="url" required>
 		<button type="submit">Create</button>
@@ -47,29 +49,29 @@ func show(w http.ResponseWriter, r *http.Request) {
 
 func create(conf config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Create a POST request, add the URL and title to the form data,
-		// and send it to the radar items service.
-		client := &http.Client{}
-		req, err := http.NewRequest("POST", conf.RadarItemsServiceURL.String(), nil)
+		form := url.Values{}
+		form.Set("url", r.FormValue("url"))
+		form.Set("title", r.FormValue("title"))
+
+		client := &http.Client{Timeout: 5 * time.Second}
+		req, err := http.NewRequest(http.MethodPost, conf.RadarItemsServiceURL.String(), strings.NewReader(form.Encode()))
 		if err != nil {
 			grohl.Log(grohl.Data{"msg": "error creating request to radar items service", "err": err})
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-		q := req.URL.Query()
-		q.Set("url", r.FormValue("url"))
-		q.Set("title", r.FormValue("title"))
-		req.URL.RawQuery = q.Encode()
 		if conf.RadarItemsServiceToken != "" {
 			req.Header.Set("Authorization", "Bearer "+conf.RadarItemsServiceToken)
 		}
+		grohl.Log(grohl.Data{"msg": "sending request to radar items service", "url": conf.RadarItemsServiceURL.String(), "form": form})
 		resp, err := client.Do(req)
 		if err != nil {
 			grohl.Log(grohl.Data{"msg": "error sending request to radar items service", "err": err})
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
+		grohl.Log(grohl.Data{"msg": "received response from radar items service", "status": resp.Status})
 		defer resp.Body.Close()
 		if resp.StatusCode != http.StatusCreated {
 			grohl.Log(grohl.Data{"msg": "error creating radar item", "status": resp.Status})
@@ -87,7 +89,7 @@ func main() {
 	conf := &config{}
 
 	flag.StringVar(&conf.ServeURL, "http", ":3000", "The IP/PORT to bind this server to.")
-	flag.StringVar(&conf.RadarItemsServiceUnparsedURL, "url", "http://localhost:8291/api", "The URL of the radar items service.")
+	flag.StringVar(&conf.RadarItemsServiceUnparsedURL, "url", "http://localhost:8291/api/radar_items", "The URL of the radar items service.")
 	flag.StringVar(&conf.RadarItemsServiceToken, "token", "", "The token for the radar items service.")
 	flag.Parse()
 

@@ -2,8 +2,9 @@ package radar
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
+
+	"github.com/technoweenie/grohl"
 )
 
 func NewAPIHandler(radarItemsService RadarItemsService, debug bool) APIHandler {
@@ -27,7 +28,7 @@ type APIHandler struct {
 }
 
 func (h APIHandler) Error(w http.ResponseWriter, message string, code int) {
-	log.Printf("status=%d message=\"%s\"", code, message)
+	grohl.Log(grohl.Data{"status": code, "message": message})
 	http.Error(w, message, code)
 }
 
