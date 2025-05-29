@@ -7,6 +7,7 @@ RUN CGO_ENABLED=0 go test github.com/parkr/radar/...
 
 FROM scratch
 COPY --from=build /go/bin/radar /bin/radar
+COPY --from=build /go/bin/radar-poster /bin/radar-poster
 COPY --from=build /go/bin/radar-healthcheck /bin/radar-healthcheck
 EXPOSE 3306
 HEALTHCHECK --start-period=1s --interval=30s --retries=1 --timeout=5s CMD [ "/bin/radar-healthcheck" ]
