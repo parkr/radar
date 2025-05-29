@@ -7,6 +7,11 @@ import (
 	"github.com/technoweenie/grohl"
 )
 
+type apiListItemsResponse struct {
+	OldRadarItems []RadarItem `json:"OldItems"`
+	NewRadarItems []RadarItem `json:"NewRadarItems"`
+}
+
 func NewAPIHandler(radarItemsService RadarItemsService, debug bool) APIHandler {
 	return APIHandler{
 		RadarItems: radarItemsService,
@@ -35,7 +40,7 @@ func (h APIHandler) Error(w http.ResponseWriter, message string, code int) {
 func (h APIHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost && r.URL.Path == apiPrefix {
 		h.CreateRadarItem(w, r)
-		h.radarGeneratedChan <- true
+		go func() { h.radarGeneratedChan <- true }()
 		return
 	}
 
@@ -73,7 +78,10 @@ func (h APIHandler) ListRadarItems(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = json.NewEncoder(w).Encode(map[string]interface{}{"OldItems": oldRadarItems, "NewRadarItems": newRadarItems})
+	err = json.NewEncoder(w).Encode(apiListItemsResponse{
+		OldRadarItems: oldRadarItems,
+		NewRadarItems: newRadarItems,
+	})
 	if err != nil {
 		h.Error(w, err.Error(), http.StatusInternalServerError)
 		return
