@@ -96,6 +96,7 @@ func main() {
 	u, err := url.Parse(conf.RadarItemsServiceUnparsedURL)
 	if err != nil {
 		grohl.Log(grohl.Data{"msg": "error parsing radar items service URL:", "err": err})
+		os.Exit(1)
 	}
 	conf.RadarItemsServiceURL = u
 
