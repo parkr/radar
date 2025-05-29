@@ -2,14 +2,21 @@ package radar
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
+
+	"github.com/technoweenie/grohl"
 )
 
-func NewAPIHandler(radarItemsService RadarItemsService, debug bool) APIHandler {
+type apiListItemsResponse struct {
+	OldRadarItems []RadarItem `json:"OldItems"`
+	NewRadarItems []RadarItem `json:"NewRadarItems"`
+}
+
+func NewAPIHandler(radarItemsService RadarItemsService, debug bool, radarGeneratedChan chan bool) APIHandler {
 	return APIHandler{
-		RadarItems: radarItemsService,
-		Debug:      debug,
+		RadarItems:         radarItemsService,
+		Debug:              debug,
+		radarGeneratedChan: radarGeneratedChan,
 	}
 }
 
@@ -27,7 +34,7 @@ type APIHandler struct {
 }
 
 func (h APIHandler) Error(w http.ResponseWriter, message string, code int) {
-	log.Printf("status=%d message=\"%s\"", code, message)
+	grohl.Log(grohl.Data{"status": code, "message": message})
 	http.Error(w, message, code)
 }
 
@@ -72,7 +79,10 @@ func (h APIHandler) ListRadarItems(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = json.NewEncoder(w).Encode(map[string]interface{}{"OldItems": oldRadarItems, "NewRadarItems": newRadarItems})
+	err = json.NewEncoder(w).Encode(apiListItemsResponse{
+		OldRadarItems: oldRadarItems,
+		NewRadarItems: newRadarItems,
+	})
 	if err != nil {
 		h.Error(w, err.Error(), http.StatusInternalServerError)
 		return

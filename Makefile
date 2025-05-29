@@ -2,9 +2,13 @@ DOCKER_TAG:=$(shell git rev-parse HEAD)
 DOCKER_IMAGE:=parkr/radar:$(DOCKER_TAG)
 PLATFORMS:=linux/amd64,linux/arm64
 
+.PHONY: all build test server docker-build docker-test docker-release docker-buildx-info docker-buildx-create
 all: build test
+bin/%:
+	$(eval BINARY_NAME := $(patsubst bin/%,%,$@))
+	go build -o bin/$(BINARY_NAME) github.com/parkr/radar/cmd/$(BINARY_NAME)
 
-build:
+build: bin/radar bin/radar-healthcheck bin/radar-poster
 	go install github.com/parkr/radar/...
 
 test:
