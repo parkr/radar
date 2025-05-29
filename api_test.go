@@ -13,12 +13,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// TODO: Write tests for all methods in api.go
-// /api/radar_items gave a 504 Gateway Timeout error, why?
 func TestApiHandler_UnsupportedMethod(t *testing.T) {
 	// Create a new APIHandler with a mock RadarItemsService
 	mockService := RadarItemsService{}
-	handler := NewAPIHandler(mockService, false)
+	handler := NewAPIHandler(mockService, false, make(chan bool, 100))
 
 	// Create a new HTTP request with an unsupported method
 	req, err := http.NewRequest("PUT", apiPrefix, nil)
@@ -63,7 +61,7 @@ func TestApiHandler_ListItems(t *testing.T) {
 	ghClient.BaseURL = serverURL
 	radarItemsService := NewRadarItemsService(ghClient, "monalisa", "diary")
 	debug := false
-	handler := NewAPIHandler(radarItemsService, debug)
+	handler := NewAPIHandler(radarItemsService, debug, make(chan bool, 100))
 
 	// Create a new HTTP request for listing items
 	req, err := http.NewRequest("GET", apiPrefix, nil)
@@ -120,7 +118,7 @@ func TestApiHandler_CreateItem(t *testing.T) {
 	ghClient.BaseURL = serverURL
 	radarItemsService := NewRadarItemsService(ghClient, "monalisa", "diary")
 	debug := false
-	handler := NewAPIHandler(radarItemsService, debug)
+	handler := NewAPIHandler(radarItemsService, debug, make(chan bool, 100))
 
 	// Create a new HTTP request for listing items
 	form := url.Values{}

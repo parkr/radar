@@ -99,7 +99,7 @@ func main() {
 	mux.Handle("/emails", emailHandler)
 	mux.Handle("/email", emailHandler)
 
-	apiHandler := radar.NewAPIHandler(radarItemsService, debug)
+	apiHandler := radar.NewAPIHandler(radarItemsService, debug, radarGeneratedChan)
 	mux.Handle("/api/", apiHandler)
 
 	mux.Handle("/health", radar.NewHealthHandler(radarItemsService))

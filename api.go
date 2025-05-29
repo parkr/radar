@@ -12,10 +12,11 @@ type apiListItemsResponse struct {
 	NewRadarItems []RadarItem `json:"NewRadarItems"`
 }
 
-func NewAPIHandler(radarItemsService RadarItemsService, debug bool) APIHandler {
+func NewAPIHandler(radarItemsService RadarItemsService, debug bool, radarGeneratedChan chan bool) APIHandler {
 	return APIHandler{
-		RadarItems: radarItemsService,
-		Debug:      debug,
+		RadarItems:         radarItemsService,
+		Debug:              debug,
+		radarGeneratedChan: radarGeneratedChan,
 	}
 }
 
@@ -40,7 +41,7 @@ func (h APIHandler) Error(w http.ResponseWriter, message string, code int) {
 func (h APIHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost && r.URL.Path == apiPrefix {
 		h.CreateRadarItem(w, r)
-		go func() { h.radarGeneratedChan <- true }()
+		h.radarGeneratedChan <- true
 		return
 	}
 
