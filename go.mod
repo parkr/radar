@@ -20,7 +20,7 @@ require github.com/mailgun/errors v0.4.0 // indirect
 
 require (
 	github.com/ProtonMail/go-crypto v0.0.0-20230217124315-7d5c6f04bbb8 // indirect
-	github.com/cloudflare/circl v1.3.7 // indirect
+	github.com/cloudflare/circl v1.6.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-chi/chi/v5 v5.2.1 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
