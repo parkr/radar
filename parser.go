@@ -18,6 +18,11 @@ import (
 
 var titleExtractorRegexp = regexp.MustCompile("(?i)<title>(.+)</title>")
 
+// rawSuffixRegexp matches a trailing annotation of the form " *(...)* " at the end of a
+// radar item line, e.g. " *(added July 1, 2026)*". It is intentionally greedy so that
+// annotations with nested parentheses are captured in full.
+var rawSuffixRegexp = regexp.MustCompile(` \*\(.*\)\*$`)
+
 func (r RadarItem) GetTitle() string {
 	if r.Title == "" {
 		r.Title = titleForWebpage(r.URL)
@@ -153,11 +158,14 @@ func extractLinkedTodosFromMarkdown(body string) ([]RadarItem, error) {
 				continue
 			}
 			// Not checked off, parse and include.
-			title, url := parseMarkdownLink(line.Summary[len("[ ] "):])
+			linkText := line.Summary[len("[ ] "):]
+			rawSuffix := rawSuffixRegexp.FindString(linkText)
+			strippedLinkText := linkText[:len(linkText)-len(rawSuffix)]
+			title, url := parseMarkdownLink(strippedLinkText)
 			if url != "" {
-				items = append(items, RadarItem{Title: title, URL: url})
+				items = append(items, RadarItem{Title: title, URL: url, RawSuffix: rawSuffix})
 			} else {
-				Printf("unable to parse link [skip]: %s", line.Summary[len("[ ] "):])
+				Printf("unable to parse link [skip]: %s", linkText)
 			}
 		}
 	}

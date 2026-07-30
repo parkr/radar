@@ -144,6 +144,69 @@ func Test_parseMarkdownLink(t *testing.T) {
 	}
 }
 
+func Test_extractLinkedTodosFromMarkdown_withDateSuffix(t *testing.T) {
+	body := `
+- [ ] [My item](http://example.com) *(added July 1, 2026)*
+- [ ] [Another item](https://example.org)
+- [ ] [Life is too short for dated CLI tools (Twitter thread)](https://mobile.twitter.com/amilajack/status/1479328649820000256)
+- [ ] [Note with parens](https://example.com/note) *(note: check this later)*
+`
+	items, err := extractLinkedTodosFromMarkdown(body)
+
+	assert.NoError(t, err)
+	assert.Len(t, items, 4)
+	assert.Equal(t, RadarItem{Title: "My item", URL: "http://example.com", RawSuffix: " *(added July 1, 2026)*"}, items[0])
+	assert.Equal(t, RadarItem{Title: "Another item", URL: "https://example.org"}, items[1])
+	assert.Equal(t, RadarItem{Title: "Life is too short for dated CLI tools (Twitter thread)", URL: "https://mobile.twitter.com/amilajack/status/1479328649820000256"}, items[2])
+	assert.Equal(t, RadarItem{Title: "Note with parens", URL: "https://example.com/note", RawSuffix: " *(note: check this later)*"}, items[3])
+}
+
+func Test_RadarItem_GetMarkdown_withRawSuffix(t *testing.T) {
+	item := RadarItem{Title: "My item", URL: "http://example.com", RawSuffix: " *(added July 1, 2026)*"}
+	assert.Equal(t, "[My item](http://example.com) *(added July 1, 2026)*", item.GetMarkdown())
+}
+
+func Test_RadarItem_GetMarkdown_withoutRawSuffix(t *testing.T) {
+	item := RadarItem{Title: "My item", URL: "http://example.com"}
+	assert.Equal(t, "[My item](http://example.com)", item.GetMarkdown())
+}
+
+func Test_rawSuffixRegexp(t *testing.T) {
+	testcases := []struct {
+		input    string
+		expected string
+	}{
+		{
+			input:    `[My item](http://example.com) *(added July 1, 2026)*`,
+			expected: ` *(added July 1, 2026)*`,
+		},
+		{
+			input:    `[Note with parens](https://example.com/note) *(note: check this later)*`,
+			expected: ` *(note: check this later)*`,
+		},
+		{
+			// Title with parentheses should not match
+			input:    `[Life is too short for dated CLI tools (Twitter thread)](https://mobile.twitter.com/amilajack/status/1479328649820000256)`,
+			expected: ``,
+		},
+		{
+			// No suffix
+			input:    `[Another item](https://example.org)`,
+			expected: ``,
+		},
+		{
+			// Suffix with nested parentheses
+			input:    `[My item](http://example.com) *(note about (nested) parens)*`,
+			expected: ` *(note about (nested) parens)*`,
+		},
+	}
+	for _, tc := range testcases {
+		actual := rawSuffixRegexp.FindString(tc.input)
+		assert.Equal(t, tc.expected, actual, "input: %q", tc.input)
+	}
+}
+
+
 func Test_isBinaryResource(t *testing.T) {
 	testcases := []struct {
 		expected bool
