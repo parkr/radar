@@ -18,11 +18,6 @@ import (
 
 var titleExtractorRegexp = regexp.MustCompile("(?i)<title>(.+)</title>")
 
-// rawSuffixRegexp matches a trailing annotation of the form " *(...)* " at the end of a
-// radar item line, e.g. " *(added July 1, 2026)*". It is intentionally greedy so that
-// annotations with nested parentheses are captured in full.
-var rawSuffixRegexp = regexp.MustCompile(` \*\(.*\)\*$`)
-
 func (r RadarItem) GetTitle() string {
 	if r.Title == "" {
 		r.Title = titleForWebpage(r.URL)
@@ -159,11 +154,9 @@ func extractLinkedTodosFromMarkdown(body string) ([]RadarItem, error) {
 			}
 			// Not checked off, parse and include.
 			linkText := line.Summary[len("[ ] "):]
-			rawSuffix := rawSuffixRegexp.FindString(linkText)
-			strippedLinkText := linkText[:len(linkText)-len(rawSuffix)]
-			title, url := parseMarkdownLink(strippedLinkText)
+			title, url, rawSuffix := parseMarkdownLinkFull(linkText)
 			if url != "" {
-				items = append(items, RadarItem{Title: title, URL: url, RawSuffix: rawSuffix})
+				items = append(items, RadarItem{Title: title, URL: url, RawSuffix: trimSuffix(rawSuffix)})
 			} else {
 				Printf("unable to parse link [skip]: %s", linkText)
 			}
@@ -172,14 +165,81 @@ func extractLinkedTodosFromMarkdown(body string) ([]RadarItem, error) {
 	return items, nil
 }
 
+// parseMarkdownLink parses a markdown link of the form [title](url) and returns
+// the title and url. Any trailing text after the closing ) is ignored.
 func parseMarkdownLink(link string) (title string, url string) {
-	closingParenIdx := strings.LastIndex(link, ")")
+	title, url, _ = parseMarkdownLinkFull(link)
+	return
+}
+
+// parseMarkdownLinkFull parses a markdown link of the form [title](url) and
+// returns the title, url, and any trailing text after the closing ).
+// The suffix may be any text: plain notes, italic annotations, or multi-line
+// continuations added by the user.
+func parseMarkdownLinkFull(link string) (title, url, suffix string) {
 	boundaryIdx := strings.LastIndex(link, "](")
 	openingIdx := strings.Index(link, "[")
-	if closingParenIdx < 0 || boundaryIdx < 0 || openingIdx < 0 {
-		return "", ""
+	if boundaryIdx < 0 || openingIdx < 0 {
+		return "", "", ""
 	}
-	return link[openingIdx+1 : boundaryIdx], link[boundaryIdx+2 : closingParenIdx]
+	closingParenIdx := findURLClosingParen(link, boundaryIdx+2)
+	if closingParenIdx < 0 {
+		return "", "", ""
+	}
+	title = link[openingIdx+1 : boundaryIdx]
+	url = link[boundaryIdx+2 : closingParenIdx]
+	if closingParenIdx+1 < len(link) {
+		suffix = link[closingParenIdx+1:]
+	}
+	return
+}
+
+// findURLClosingParen finds the index of the ) that closes the markdown link URL
+// (i.e. the portion that started with ]( at urlStart-2). It uses a heuristic:
+// the first ) that is followed by end-of-string, whitespace, or another
+// suffix-starting character. If no such ) is found it falls back to the last )
+// in the string (for URLs that themselves contain unescaped ) characters and
+// have no trailing suffix).
+func findURLClosingParen(link string, urlStart int) int {
+	for i := urlStart; i < len(link); i++ {
+		if link[i] != ')' {
+			continue
+		}
+		// ) at end of string, or followed by whitespace → this closes the URL.
+		if i == len(link)-1 || link[i+1] == ' ' || link[i+1] == '\t' || link[i+1] == '\n' || link[i+1] == '\r' {
+			return i
+		}
+	}
+	// Fallback: the last ) in the string closes the URL (handles URLs that
+	// themselves end with ) and have no suffix).
+	return strings.LastIndex(link, ")")
+}
+
+// trimSuffix removes any structurally-spurious tail from a raw suffix. The
+// changelog library may attach non-item lines (section headers, footers) to the
+// last bullet in a section. We keep the same-line portion and any indented
+// continuation lines, but stop at the first unindented non-empty line, which
+// signals an issue-format element rather than a user annotation.
+func trimSuffix(suffix string) string {
+	if !strings.Contains(suffix, "\n") {
+		return suffix
+	}
+	lines := strings.Split(suffix, "\n")
+	result := lines[0]
+	for i := 1; i < len(lines); i++ {
+		line := lines[i]
+		switch {
+		case line == "":
+			result += "\n" + line
+		case len(line) > 0 && (line[0] == ' ' || line[0] == '\t'):
+			result += "\n" + line
+		default:
+			// Unindented non-empty line: issue structural content, not annotation.
+			goto done
+		}
+	}
+done:
+	return strings.TrimRight(result, "\n")
 }
 
 var privateIPBlocks []*net.IPNet

@@ -51,7 +51,7 @@ var testData = testDataContainer{
 	- [ ] [Overcast auf Twitter: „Want to join the Overcast beta group? TestFlight: https://t.co/SQ97C8KmA0 Slack group for feedback, bug reports, and feature discussion: https://t.co/mC7rGQ43f1 Scammers sometimes charge for these links. Please don’t fall for it! Overcast’s beta is always free.“ / Twitter](https://mobile.twitter.com/OvercastFM/status/1514597131587313664)
 	- [ ] ["Shelter In Place" 5lb Bag : Ritual Coffee Roasters](https://ritualcoffee.com/shop/coffee/shelter-in-place-5lb/)
 
-	/cc @parkr
+	* /cc @parkr
 	`,
 
 	newStyleBody: `
