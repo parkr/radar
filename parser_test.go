@@ -47,7 +47,7 @@ A new day! Here's what you have saved:
 - [ ] ["Shelter In Place" 5lb Bag : Ritual Coffee Roasters](https://ritualcoffee.com/shop/coffee/shelter-in-place-5lb/)
 
 
-/cc @parkr
+* /cc @parkr
 `
 	items, err := extractLinkedTodosFromMarkdown(body)
 
@@ -141,6 +141,148 @@ func Test_parseMarkdownLink(t *testing.T) {
 		actualTitle, actualURL := parseMarkdownLink(testcase.input)
 		assert.Equal(t, testcase.title, actualTitle, "Link: %q", testcase.input)
 		assert.Equal(t, testcase.url, actualURL, "Link: %q", testcase.input)
+	}
+}
+
+func Test_extractLinkedTodosFromMarkdown_withSuffix(t *testing.T) {
+	body := `
+- [ ] [Item with date](http://example.com) *(added July 1, 2026)*
+- [ ] [Item with plain note](http://example.org) buy this
+- [ ] [Item with hyphenated note](http://example.net) - go here someday
+- [ ] [Another item](https://example.com/2)
+- [ ] [Life is too short for dated CLI tools (Twitter thread)](https://mobile.twitter.com/amilajack/status/1479328649820000256)
+`
+	items, err := extractLinkedTodosFromMarkdown(body)
+
+	assert.NoError(t, err)
+	assert.Len(t, items, 5)
+	assert.Equal(t, RadarItem{Title: "Item with date", URL: "http://example.com", RawSuffix: " *(added July 1, 2026)*"}, items[0])
+	assert.Equal(t, RadarItem{Title: "Item with plain note", URL: "http://example.org", RawSuffix: " buy this"}, items[1])
+	assert.Equal(t, RadarItem{Title: "Item with hyphenated note", URL: "http://example.net", RawSuffix: " - go here someday"}, items[2])
+	assert.Equal(t, RadarItem{Title: "Another item", URL: "https://example.com/2"}, items[3])
+	assert.Equal(t, RadarItem{Title: "Life is too short for dated CLI tools (Twitter thread)", URL: "https://mobile.twitter.com/amilajack/status/1479328649820000256"}, items[4])
+}
+
+func Test_extractLinkedTodosFromMarkdown_withMultilineSuffix(t *testing.T) {
+	// The changelog library appends continuation lines as "\n\n" + txt.
+	// Simulate what line.Summary looks like for a multiline bullet point.
+	body := "- [ ] [Item with newlines in note](http://example.org)\n    Definitely make this happen\n- [ ] [Normal item](https://example.com)"
+
+	items, err := extractLinkedTodosFromMarkdown(body)
+
+	assert.NoError(t, err)
+	assert.Len(t, items, 2)
+	assert.Equal(t, "Item with newlines in note", items[0].Title)
+	assert.Equal(t, "http://example.org", items[0].URL)
+	assert.Contains(t, items[0].RawSuffix, "Definitely make this happen")
+	assert.Equal(t, RadarItem{Title: "Normal item", URL: "https://example.com"}, items[1])
+}
+
+func Test_RadarItem_GetMarkdown_withRawSuffix(t *testing.T) {
+	item := RadarItem{Title: "My item", URL: "http://example.com", RawSuffix: " *(added July 1, 2026)*"}
+	assert.Equal(t, "[My item](http://example.com) *(added July 1, 2026)*", item.GetMarkdown())
+}
+
+func Test_RadarItem_GetMarkdown_withoutRawSuffix(t *testing.T) {
+	item := RadarItem{Title: "My item", URL: "http://example.com"}
+	assert.Equal(t, "[My item](http://example.com)", item.GetMarkdown())
+}
+
+func Test_findURLClosingParen(t *testing.T) {
+	testcases := []struct {
+		input         string
+		expectedURL   string
+		expectedSuffix string
+	}{
+		{
+			// Date suffix with ) inside it — must not confuse the URL end.
+			input:          `[My item](http://example.com) *(added July 1, 2026)*`,
+			expectedURL:    `http://example.com`,
+			expectedSuffix: ` *(added July 1, 2026)*`,
+		},
+		{
+			// Plain text suffix — no parens.
+			input:          `[Item with note after](http://example.org) buy this`,
+			expectedURL:    `http://example.org`,
+			expectedSuffix: ` buy this`,
+		},
+		{
+			// Hyphenated note suffix.
+			input:          `[Item with hyphenated note](http://example.org) - go here someday`,
+			expectedURL:    `http://example.org`,
+			expectedSuffix: ` - go here someday`,
+		},
+		{
+			// Title with parens — must not be mistaken for a suffix.
+			input:          `[Life is too short for dated CLI tools (Twitter thread)](https://mobile.twitter.com/amilajack/status/1479328649820000256)`,
+			expectedURL:    `https://mobile.twitter.com/amilajack/status/1479328649820000256`,
+			expectedSuffix: ``,
+		},
+		{
+			// URL itself ends with ) (edge case from existing tests).
+			input:          `[F) Sector 6 (NOC) - Metroid Fusion Guide - IGN](https://www.ign.com/wikis/metroid-fusion/F)_Sector_6_(NOC))`,
+			expectedURL:    `https://www.ign.com/wikis/metroid-fusion/F)_Sector_6_(NOC)`,
+			expectedSuffix: ``,
+		},
+		{
+			// No suffix.
+			input:          `[Another item](https://example.org)`,
+			expectedURL:    `https://example.org`,
+			expectedSuffix: ``,
+		},
+	}
+	for _, tc := range testcases {
+		title, url, suffix := parseMarkdownLinkFull(tc.input)
+		assert.NotEmpty(t, title, "title should not be empty for %q", tc.input)
+		assert.Equal(t, tc.expectedURL, url, "url mismatch for %q", tc.input)
+		assert.Equal(t, tc.expectedSuffix, suffix, "suffix mismatch for %q", tc.input)
+	}
+}
+
+func Test_trimSuffix(t *testing.T) {
+	testcases := []struct {
+		input    string
+		expected string
+	}{
+		{
+			// Same-line suffix: preserved as-is.
+			input:    ` buy this`,
+			expected: ` buy this`,
+		},
+		{
+			// Same-line italic date annotation: preserved.
+			input:    ` *(added July 1, 2026)*`,
+			expected: ` *(added July 1, 2026)*`,
+		},
+		{
+			// Indented continuation: preserved (user annotation).
+			input:    "\n\n    Definitely make this happen",
+			expected: "\n\n    Definitely make this happen",
+		},
+		{
+			// Tab-indented continuation: preserved.
+			input:    "\n\n\tSome note here",
+			expected: "\n\n\tSome note here",
+		},
+		{
+			// Unindented section header: stripped.
+			input:    "\n\n## *Previously:*",
+			expected: "",
+		},
+		{
+			// Unindented footer: stripped.
+			input:    "\n\nPreviously: https://github.com/parkr/radar/issues/1",
+			expected: "",
+		},
+		{
+			// Empty: no change.
+			input:    "",
+			expected: "",
+		},
+	}
+	for _, tc := range testcases {
+		actual := trimSuffix(tc.input)
+		assert.Equal(t, tc.expected, actual, "input: %q", tc.input)
 	}
 }
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	"time"
 
 	"github.com/google/go-github/v53/github"
 	"github.com/pkg/errors"
@@ -16,6 +17,10 @@ type RadarItem struct {
 	ID    int64
 	URL   string
 	Title string
+
+	// RawSuffix is any trailing annotation appended after the markdown link,
+	// e.g. " *(added July 1, 2026)*". It is preserved verbatim on each read/write.
+	RawSuffix string
 
 	parsedURL *url.URL
 }
@@ -34,7 +39,7 @@ func (r *RadarItem) GetHostname() string {
 }
 
 func (r *RadarItem) GetMarkdown() string {
-	return "[" + r.GetTitle() + "](" + r.URL + ")"
+	return "[" + r.GetTitle() + "](" + r.URL + ")" + r.RawSuffix
 }
 
 func (r *RadarItem) GetFormatted() string {
@@ -103,8 +108,9 @@ func (rs RadarItemsService) Create(ctx context.Context, m RadarItem) error {
 	if err != nil {
 		return errors.WithMessage(err, "error fetching open issue")
 	}
+	dateSuffix := fmt.Sprintf(" *(added %s)*", time.Now().Format("January 2, 2006"))
 	_, _, err = rs.githubClient.Issues.CreateComment(ctx, rs.owner, rs.repoName, *issue.Number, &github.IssueComment{
-		Body: github.String(fmt.Sprintf("- [ ] [%s](%s)", m.GetTitle(), m.URL)),
+		Body: github.String(fmt.Sprintf("- [ ] [%s](%s)%s", m.GetTitle(), m.URL, dateSuffix)),
 	})
 	return err
 }
