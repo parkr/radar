@@ -8,13 +8,16 @@ require (
 	github.com/mailgun/mailgun-go/v4 v4.23.0
 	github.com/parkr/changelog v1.5.0
 	github.com/pkg/errors v0.9.1
-	github.com/stretchr/testify v1.12.0
+	github.com/stretchr/testify v1.12.1
 	github.com/technoweenie/grohl v0.0.0-20140924204239-f4613feb389e
 	golang.org/x/oauth2 v0.36.0
 	mvdan.cc/xurls/v2 v2.6.0
 )
 
-require github.com/mailgun/errors v0.4.0 // indirect
+require (
+	github.com/mailgun/errors v0.4.0 // indirect
+	go.yaml.in/yaml/v3 v3.0.5 // indirect
+)
 
 require (
 	github.com/ProtonMail/go-crypto v0.0.0-20230217124315-7d5c6f04bbb8 // indirect
@@ -27,6 +30,4 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	golang.org/x/crypto v0.52.0 // indirect
 	golang.org/x/sys v0.45.0 // indirect
-	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
