@@ -1,7 +1,7 @@
 name: Release binaries
 
 # Prebuilt binaries on every release, so a host can download radar instead of
-# compiling it (parkr/puppet fetches the linux ones by their SHA256SUMS hash).
+# compiling it, checking it against SHA256SUMS.
 # radar is pure Go (CGO_ENABLED=0), so one runner cross-compiles them all.
 #
 # A manual run builds the same files as a workflow artifact, without touching a
