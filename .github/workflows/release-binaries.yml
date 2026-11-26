@@ -1,0 +1,52 @@
+name: Release binaries
+
+# Prebuilt binaries on every release, so a host can download radar instead of
+# compiling it (parkr/puppet fetches the linux ones by their SHA256SUMS hash).
+# radar is pure Go (CGO_ENABLED=0), so one runner cross-compiles them all.
+#
+# A manual run builds the same files as a workflow artifact, without touching a
+# release: a way to try this workflow on a branch.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build and upload
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v7
+    - uses: actions/setup-go@v7
+      with:
+        go-version-file: go.mod
+    - name: Build
+      env:
+        CGO_ENABLED: "0"
+      run: |
+        set -euo pipefail
+        mkdir dist
+        for os in linux darwin; do
+          for arch in amd64 arm64; do
+            for cmd in radar radar-healthcheck radar-poster; do
+              GOOS=$os GOARCH=$arch go build -trimpath -ldflags "-s -w" \
+                -o "dist/${cmd}-${os}-${arch}" "./cmd/${cmd}"
+            done
+          done
+        done
+        cd dist && sha256sum -- * > SHA256SUMS && cat SHA256SUMS
+    - name: Upload to the release
+      if: github.event_name == 'release'
+      env:
+        GH_TOKEN: ${{ github.token }}
+        TAG: ${{ github.event.release.tag_name }}
+      run: gh release upload "$TAG" dist/* --clobber
+    - name: Keep as an artifact
+      if: github.event_name == 'workflow_dispatch'
+      uses: actions/upload-artifact@v7
+      with:
+        name: radar-binaries
+        path: dist/
