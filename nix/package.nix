@@ -21,7 +21,7 @@ buildGoModule {
   };
 
   # Update with script/update-vendor-hash after changing go.mod / go.sum.
-  vendorHash = "sha256-ASC0WwBxNNaCtfX6S71eJKsO5gWLpYkX1HzA6ocdr6Q=";
+  vendorHash = "sha256-DpvJpsR0Szl/l2OBd3aroPqGKclR7dyL8XqIjltoFXQ=";
 
   # The Docker image is built static; so is this.
   env.CGO_ENABLED = "0";
