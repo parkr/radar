@@ -104,7 +104,7 @@ func TestApiHandler_CreateItem(t *testing.T) {
 		inputIssueComment := &github.IssueComment{}
 		err = json.Unmarshal(body, inputIssueComment)
 		assert.NoError(t, err, "Failed to unmarshal request body into IssueComment")
-		assert.Equal(t, "- [ ] [Some Great Site](https://somegreat.site)", inputIssueComment.GetBody())
+		assert.Regexp(t, `^- \[ \] \[Some Great Site\]\(https://somegreat\.site\) \*\(added .+\)\*$`, inputIssueComment.GetBody())
 
 		w.WriteHeader(http.StatusCreated) // Respond with 201 Created
 		_, err = w.Write(body)            // Echo back the request body
